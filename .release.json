@@ -1,0 +1,8 @@
+{
+  "tag_prefix": "",
+  "timezone": "America/Chicago",
+  "release_paths": ["custom_components/event_scout"],
+  "version_fields": [
+    {"path": "custom_components/event_scout/manifest.json", "kind": "json", "key": "version"}
+  ]
+}
