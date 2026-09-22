@@ -1,0 +1,24 @@
+blueprint:
+  name: Event Scout - Daily digest
+  description: Send the daily Event Scout digest at a configured time.
+  domain: automation
+  input:
+    digest_time:
+      name: Digest time
+      description: Local time to send the daily digest.
+      default: "07:00:00"
+      selector:
+        time:
+
+trigger:
+  - trigger: time
+    at: !input digest_time
+
+condition: []
+
+action:
+  - action: event_scout.send_digest
+    data:
+      period: daily
+
+mode: single

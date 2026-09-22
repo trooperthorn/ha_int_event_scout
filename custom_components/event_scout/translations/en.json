@@ -1,0 +1,234 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Event Scout",
+        "description": "Event Scout aggregates local events and tracks vendor application deadlines. After finishing this step, add one or more sources from the integration's page.",
+        "data": {
+          "name": "Name",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "radius_miles": "Radius (miles)",
+          "horizon_days": "Look-ahead horizon (days)",
+          "update_interval_hours": "Update interval (hours)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This location is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Event Scout options",
+        "data": {
+          "notify_service": "Notify service (without the notify. prefix)",
+          "vendor_lead_days": "Vendor deadline lead times (days)",
+          "reconnaissance_days": "Reconnaissance lead time (days)",
+          "digest_time": "Daily digest time (HH:MM)",
+          "categories": "Categories to include",
+          "target_calendar": "Calendar entity for Add to calendar actions"
+        }
+      }
+    }
+  },
+  "config_subentries": {
+    "source": {
+      "title": "Event source",
+      "entry_type": "Event source",
+      "initiate_flow": {
+        "user": "Add source"
+      },
+      "step": {
+        "user": {
+          "title": "Choose a source type",
+          "data": {
+            "source_kind": "Source type"
+          }
+        },
+        "args": {
+          "title": "Configure the source",
+          "data": {
+            "name": "Name",
+            "url": "URL",
+            "category": "Category",
+            "username": "Username",
+            "password": "Password",
+            "vendor_probe": "Probe the event's site for vendor application pages",
+            "api_key": "API key",
+            "segments": "Ticketmaster segments",
+            "keyword": "Keyword filter",
+            "domain": "Socrata domain",
+            "dataset_id": "Dataset ID",
+            "field_title": "Title field",
+            "field_start": "Start date field",
+            "field_end": "End date field",
+            "field_url": "URL field",
+            "field_venue": "Venue field",
+            "app_token": "App token",
+            "title": "Event title",
+            "month": "Month (1-12)",
+            "day": "Day of month",
+            "weekday": "Weekday (0=Monday)",
+            "nth": "Nth occurrence (-1 for last)",
+            "city": "City",
+            "vendor_open": "Vendor application opens (YYYY-MM-DD)",
+            "vendor_deadline": "Vendor application deadline (YYYY-MM-DD)",
+            "vendor_url": "Vendor application URL",
+            "token": "Private token",
+            "organization_ids": "Organizer IDs (comma-separated)",
+            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+          }
+        },
+        "reconfigure": {
+          "title": "Reconfigure the source",
+          "data": {
+            "name": "Name",
+            "url": "URL",
+            "category": "Category",
+            "username": "Username",
+            "password": "Password",
+            "vendor_probe": "Probe the event's site for vendor application pages",
+            "api_key": "API key",
+            "segments": "Ticketmaster segments",
+            "keyword": "Keyword filter",
+            "domain": "Socrata domain",
+            "dataset_id": "Dataset ID",
+            "field_title": "Title field",
+            "field_start": "Start date field",
+            "field_end": "End date field",
+            "field_url": "URL field",
+            "field_venue": "Venue field",
+            "app_token": "App token",
+            "title": "Event title",
+            "month": "Month (1-12)",
+            "day": "Day of month",
+            "weekday": "Weekday (0=Monday)",
+            "nth": "Nth occurrence (-1 for last)",
+            "city": "City",
+            "vendor_open": "Vendor application opens (YYYY-MM-DD)",
+            "vendor_deadline": "Vendor application deadline (YYYY-MM-DD)",
+            "vendor_url": "Vendor application URL",
+            "token": "Private token",
+            "organization_ids": "Organizer IDs (comma-separated)",
+            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+          }
+        }
+      },
+      "abort": {
+        "cannot_connect": "Could not validate this source"
+      },
+      "error": {
+        "cannot_connect": "Could not validate this source"
+      }
+    }
+  },
+  "entity": {
+    "calendar": {
+      "events": {
+        "name": "Events"
+      },
+      "vendor_deadlines": {
+        "name": "Vendor deadlines"
+      }
+    },
+    "sensor": {
+      "upcoming_events": {
+        "name": "Upcoming events"
+      },
+      "next_vendor_deadline": {
+        "name": "Next vendor deadline"
+      },
+      "vendor_applications_open": {
+        "name": "Vendor applications open"
+      },
+      "source_events": {
+        "name": "{source_name} events"
+      }
+    },
+    "binary_sensor": {
+      "vendor_window_open": {
+        "name": "Vendor window open"
+      }
+    }
+  },
+  "issues": {
+    "source_failed": {
+      "title": "Event Scout source {name} is failing",
+      "description": "The source {name} could not be fetched: {error}. Other sources continue to update normally."
+    }
+  },
+  "services": {
+    "get_digest": {
+      "name": "Get digest",
+      "description": "Return a structured and rendered digest of upcoming events and vendor deadlines without sending a notification.",
+      "fields": {
+        "period": {
+          "name": "Period",
+          "description": "Daily or weekly digest."
+        },
+        "categories": {
+          "name": "Categories",
+          "description": "Optional list of categories to include."
+        }
+      }
+    },
+    "send_digest": {
+      "name": "Send digest",
+      "description": "Send a digest of upcoming events and vendor deadlines through the configured notify service.",
+      "fields": {
+        "period": {
+          "name": "Period",
+          "description": "Daily or weekly digest."
+        },
+        "categories": {
+          "name": "Categories",
+          "description": "Optional list of categories to include."
+        }
+      }
+    },
+    "send_alerts": {
+      "name": "Send alerts",
+      "description": "Send a notification for every current vendor deadline alert through the configured notify service."
+    },
+    "set_vendor_info": {
+      "name": "Set vendor info",
+      "description": "Manually override vendor application information for one event.",
+      "fields": {
+        "uid": {
+          "name": "Event UID",
+          "description": "The uid of the event to update."
+        },
+        "available": {
+          "name": "Available",
+          "description": "Whether a vendor application is available."
+        },
+        "app_open": {
+          "name": "Application opens",
+          "description": "The date the vendor application opens."
+        },
+        "app_deadline": {
+          "name": "Application deadline",
+          "description": "The date the vendor application closes."
+        },
+        "app_url": {
+          "name": "Application URL",
+          "description": "The URL of the vendor application."
+        },
+        "booth_fee_text": {
+          "name": "Booth fee",
+          "description": "The booth fee, as free text."
+        },
+        "jury_fee_text": {
+          "name": "Jury fee",
+          "description": "The jury fee, as free text."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh",
+      "description": "Request an immediate coordinator refresh."
+    }
+  }
+}

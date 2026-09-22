@@ -1,0 +1,16 @@
+[
+  {
+    ":id": "row1",
+    "event_name": "Convention Center Trade Show",
+    "start_date": "2026-11-20T00:00:00.000",
+    "end_date": "2026-11-22T00:00:00.000",
+    "website": "https://example.com/trade-show",
+    "venue": "Austin Convention Center"
+  },
+  {
+    ":id": "row2",
+    "event_name": "Palmer Craft Fair",
+    "start_date": "2026-12-01T00:00:00.000",
+    "venue": "Palmer Events Center"
+  }
+]

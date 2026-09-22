@@ -1,0 +1,40 @@
+blueprint:
+  name: Event Scout - Weekly digest
+  description: Send the weekly Event Scout digest on a chosen weekday and time.
+  domain: automation
+  input:
+    digest_time:
+      name: Digest time
+      description: Local time to send the weekly digest.
+      default: "07:00:00"
+      selector:
+        time:
+    weekday:
+      name: Weekday
+      description: Day of the week to send the weekly digest.
+      default: "mon"
+      selector:
+        select:
+          options:
+            - "mon"
+            - "tue"
+            - "wed"
+            - "thu"
+            - "fri"
+            - "sat"
+            - "sun"
+
+trigger:
+  - trigger: time
+    at: !input digest_time
+
+condition:
+  - condition: time
+    weekday: !input weekday
+
+action:
+  - action: event_scout.send_digest
+    data:
+      period: weekly
+
+mode: single

@@ -1,0 +1,33 @@
+{
+  "_embedded": {
+    "events": [
+      {
+        "id": "tm-1",
+        "name": "Family Fun Fair",
+        "url": "https://ticketmaster.example/family-fun-fair",
+        "dates": {
+          "start": {
+            "localDate": "2026-11-05",
+            "localTime": "18:00:00"
+          }
+        },
+        "classifications": [
+          {"family": true}
+        ],
+        "priceRanges": [
+          {"min": 10, "max": 25}
+        ],
+        "_embedded": {
+          "venues": [
+            {
+              "name": "Fairgrounds",
+              "city": {"name": "Exampletown"},
+              "state": {"stateCode": "TX"},
+              "location": {"latitude": "30.27", "longitude": "-97.74"}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

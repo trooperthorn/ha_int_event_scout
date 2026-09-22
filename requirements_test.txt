@@ -1,0 +1,6 @@
+homeassistant==2026.9.2
+pytest-homeassistant-custom-component==0.13.365
+pytest-cov==7.1.0
+ical>=14.1.1,<15
+ruff==0.14.4
+mypy==1.19.1

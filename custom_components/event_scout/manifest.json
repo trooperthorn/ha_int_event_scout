@@ -1,0 +1,13 @@
+{
+  "domain": "event_scout",
+  "name": "Event Scout",
+  "codeowners": ["@trooperthorn"],
+  "config_flow": true,
+  "documentation": "https://github.com/trooperthorn/ha_int_event_scout",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/trooperthorn/ha_int_event_scout/issues",
+  "quality_scale": "silver",
+  "requirements": ["ical>=14.1.1,<15"],
+  "version": "2026.09.22.0"
+}

@@ -1,0 +1,52 @@
+{
+  "entity": {
+    "calendar": {
+      "events": {
+        "default": "mdi:calendar-star"
+      },
+      "vendor_deadlines": {
+        "default": "mdi:calendar-clock"
+      }
+    },
+    "sensor": {
+      "upcoming_events": {
+        "default": "mdi:calendar-multiple"
+      },
+      "next_vendor_deadline": {
+        "default": "mdi:calendar-alert"
+      },
+      "vendor_applications_open": {
+        "default": "mdi:storefront"
+      },
+      "source_events": {
+        "default": "mdi:rss"
+      }
+    },
+    "binary_sensor": {
+      "vendor_window_open": {
+        "default": "mdi:storefront-outline",
+        "state": {
+          "on": "mdi:storefront-check",
+          "off": "mdi:storefront-outline"
+        }
+      }
+    }
+  },
+  "services": {
+    "get_digest": {
+      "service": "mdi:file-document-outline"
+    },
+    "send_digest": {
+      "service": "mdi:email-newsletter"
+    },
+    "send_alerts": {
+      "service": "mdi:bell-alert"
+    },
+    "set_vendor_info": {
+      "service": "mdi:storefront-edit"
+    },
+    "refresh": {
+      "service": "mdi:refresh"
+    }
+  }
+}

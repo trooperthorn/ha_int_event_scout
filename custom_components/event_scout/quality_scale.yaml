@@ -1,0 +1,88 @@
+rules:
+  # Bronze
+  config-flow: done
+  test-before-configure: done
+  unique-config-entry: done
+  config-flow-test-coverage: done
+  runtime-data: done
+  test-before-setup: done
+  appropriate-polling: done
+  entity-unique-id: done
+  has-entity-name: done
+  docs-triggers:
+    status: exempt
+    comment: No triggers; calendar entities provide triggers through core.
+  entity-event-setup: done
+  dependency-transparency: done
+  action-setup: done
+  common-modules: done
+  docs-conditions:
+    status: exempt
+    comment: No conditions.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  docs-actions: done
+  brands:
+    status: todo
+    comment: No brand images submitted yet; custom-repository install does not require them.
+
+  # Silver
+  config-entry-unloading: done
+  log-when-unavailable: done
+  entity-unavailable:
+    status: exempt
+    comment: Entities reflect coordinator data; a failing source is surfaced per-source, not as a global unavailable state.
+  action-exceptions: done
+  reauthentication-flow:
+    status: exempt
+    comment: No authenticated hub connection; per-source secrets are validated at subentry setup.
+  parallel-updates: done
+  test-coverage: done
+  integration-owner: done
+  docs-installation-parameters: done
+  docs-configuration-parameters: done
+
+  # Gold
+  devices:
+    status: exempt
+    comment: Service integration; entities share one service device, not per-device entries.
+  diagnostics: done
+  discovery-update-info:
+    status: exempt
+    comment: No discovery protocol.
+  discovery:
+    status: exempt
+    comment: No discovery protocol.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices:
+    status: exempt
+    comment: Not a device integration.
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: One fixed service device.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: todo
+    comment: Per-source sensors are all enabled by default; not yet reconsidered for noisy multi-source setups.
+  entity-translations: done
+  exception-translations:
+    status: todo
+    comment: Service validation errors are not yet routed through translation keys.
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues: done
+  stale-devices:
+    status: exempt
+    comment: One fixed service device; nothing to go stale.
+
+  # Platinum
+  async-dependency: done
+  inject-websession: done
+  strict-typing: done
