@@ -57,7 +57,7 @@
           "cities": "Case-insensitive match on the event's city. Leave empty to disable this criterion.",
           "counties": "Match on the county resolved from the event's coordinates, without the word County. Leave empty to disable this criterion.",
           "distance_limit": "0 disables the distance criterion.",
-          "osrm_url": "The public demo at https://router.project-osrm.org has no service guarantee; a self-hosted server is recommended for regular use."
+          "osrm_url": "The public OSRM demo server has no service guarantee; a self-hosted server is recommended for regular use. See the README for the demo server's address."
         }
       }
     }
