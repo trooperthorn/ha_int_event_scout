@@ -74,3 +74,7 @@ class FakeSession:
             if url_str.startswith(prefix) and queue:
                 return queue.pop(0)
         raise AssertionError(f"No fake response registered for {url_str}")
+
+    def post(self, url: str, **kwargs: Any) -> FakeResponse:
+        """Return the registered response for this URL; POST reuses the same registry as GET."""
+        return self.get(url, **kwargs)
