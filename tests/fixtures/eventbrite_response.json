@@ -1,0 +1,24 @@
+{
+  "pagination": {
+    "has_more_items": false,
+    "continuation": null
+  },
+  "events": [
+    {
+      "id": "eb-1",
+      "name": {"text": "Downtown Night Market"},
+      "description": {"text": "A monthly night market."},
+      "url": "https://eventbrite.example/downtown-night-market",
+      "start": {"local": "2026-10-20T18:00:00", "timezone": "America/Chicago"},
+      "end": {"local": "2026-10-20T22:00:00", "timezone": "America/Chicago"},
+      "is_free": true,
+      "venue": {
+        "id": "venue-1",
+        "name": "Main Street",
+        "address": {"localized_address_display": "123 Main St, Exampletown, TX"},
+        "latitude": "30.27",
+        "longitude": "-97.74"
+      }
+    }
+  ]
+}

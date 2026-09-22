@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Event Scout Tests//EN
+BEGIN:VEVENT
+UID:sample-1@example.com
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:Winter Market Festival
+DESCRIPTION:An annual craft festival.
+LOCATION:Downtown Square
+URL:https://example.com/winter-market
+END:VEVENT
+END:VCALENDAR
