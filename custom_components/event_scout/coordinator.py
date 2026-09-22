@@ -280,7 +280,10 @@ class EventScoutCoordinator(DataUpdateCoordinator[ScoutData]):
             try:
                 results = await osrm_client.async_table(session, origin=(hub_lat, hub_lon), destinations=[(event_lat, event_lon)])
             except OSRMError as err:
-                self.last_osrm_error = str(err)
+                # Never store the raw exception text: aiohttp errors can embed
+                # the full request URL, and diagnostics must only ever show
+                # the OSRM server's hostname (see diagnostics.py).
+                self.last_osrm_error = f"{err.__class__.__name__}: request to the configured OSRM server failed"
                 LOGGER.warning("OSRM table request failed, falling back to the estimate tier: %s", err)
             else:
                 result = results[0] if results else None

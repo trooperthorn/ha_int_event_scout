@@ -58,7 +58,8 @@ class CountyResolver:
                 resp.raise_for_status()
                 payload = await resp.json()
         except (aiohttp.ClientError, TimeoutError) as err:
-            LOGGER.warning("Census geocoder request failed for %s,%s: %s", lat, lon, err)
+            # Coordinates are not logged: they are the household's location.
+            LOGGER.warning("Census geocoder request failed: %s", err)
             return None
 
         county = county_name_from_response(payload)

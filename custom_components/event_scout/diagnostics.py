@@ -44,13 +44,7 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: EventSc
             for subentry_id, status in coordinator.data.source_status.items()
         },
         "store": coordinator.store.as_diagnostics(),
-        "last_osrm_error": _redact_error_url(coordinator.last_osrm_error, entry.options.get(CONF_OSRM_URL)),
+        # last_osrm_error is built in coordinator.py without ever including
+        # the raw exception text, so it never carries a URL to redact here.
+        "last_osrm_error": coordinator.last_osrm_error,
     }
-
-
-def _redact_error_url(error: str | None, osrm_url: str | None) -> str | None:
-    """Replace the configured OSRM URL inside a stored error message with its hostname only."""
-    if not error or not osrm_url:
-        return error
-    hostname = _redact_osrm_url(osrm_url)
-    return error.replace(osrm_url, hostname or "<redacted>")

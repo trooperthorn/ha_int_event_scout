@@ -61,7 +61,7 @@ async def test_diagnostics_redacts_osrm_url_to_hostname(hass) -> None:  # noqa: 
     assert "user:pass" not in str(diagnostics["entry_options"]["osrm_url"])
 
 
-async def test_diagnostics_redacts_osrm_url_inside_last_error(hass) -> None:  # noqa: ANN001
+async def test_diagnostics_never_includes_a_url_in_last_osrm_error(hass) -> None:  # noqa: ANN001
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="loc3",
@@ -77,8 +77,10 @@ async def test_diagnostics_redacts_osrm_url_inside_last_error(hass) -> None:  # 
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
-    entry.runtime_data.last_osrm_error = "Request to https://my-osrm.example.com/table/v1/driving/... failed"
+    # coordinator.py builds last_osrm_error without ever embedding the raw
+    # exception text, so it never carries a URL for diagnostics to redact.
+    entry.runtime_data.last_osrm_error = "ClientError: request to the configured OSRM server failed"
     entry.subentries = {}
     diagnostics = await async_get_config_entry_diagnostics(hass, entry)
-    assert "https://my-osrm.example.com" not in diagnostics["last_osrm_error"]
-    assert "my-osrm.example.com" in diagnostics["last_osrm_error"]
+    assert "https://" not in diagnostics["last_osrm_error"]
+    assert diagnostics["last_osrm_error"] == "ClientError: request to the configured OSRM server failed"
