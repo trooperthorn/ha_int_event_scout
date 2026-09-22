@@ -1,0 +1,28 @@
+blueprint:
+  name: Event Scout - Vendor alert actions
+  description: >
+    Send Event Scout vendor deadline notifications whenever a Vendor
+    Deadlines calendar event starts, so every reconnaissance, deadline, and
+    application-open alert reaches the configured notify service without a
+    custom trigger.
+  domain: automation
+  input:
+    vendor_deadlines_calendar:
+      name: Vendor Deadlines calendar
+      description: The Event Scout Vendor Deadlines calendar entity.
+      selector:
+        entity:
+          filter:
+            domain: calendar
+
+trigger:
+  - trigger: calendar
+    event: start
+    entity_id: !input vendor_deadlines_calendar
+
+condition: []
+
+action:
+  - action: event_scout.send_alerts
+
+mode: single
