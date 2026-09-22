@@ -109,7 +109,20 @@
             "vendor_url": "Vendor application URL",
             "token": "Private token",
             "organization_ids": "Organizer IDs (comma-separated)",
-            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+            "venue_ids": "Venue IDs to include (comma-separated, optional)",
+            "client_id": "Meetup OAuth client ID",
+            "member_id": "Meetup member ID",
+            "private_key": "Private key (PEM)",
+            "query": "Keyword filter",
+            "include_online": "Include online-only events",
+            "topic_category_ids": "Meetup topic category IDs (optional)",
+            "server": "IMAP server",
+            "port": "IMAP port",
+            "folder": "Folder",
+            "senders": "Sender domains",
+            "lookback_days": "Look back (days)",
+            "parsers": "Parsers to try",
+            "mark_seen": "Mark matched messages as seen"
           }
         },
         "reconfigure": {
@@ -119,7 +132,7 @@
             "url": "URL",
             "category": "Category",
             "username": "Username",
-            "password": "Password",
+            "password": "Password; leave empty to keep the stored password",
             "vendor_probe": "Probe the event's site for vendor application pages",
             "api_key": "API key",
             "segments": "Ticketmaster segments",
@@ -143,7 +156,20 @@
             "vendor_url": "Vendor application URL",
             "token": "Private token",
             "organization_ids": "Organizer IDs (comma-separated)",
-            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+            "venue_ids": "Venue IDs to include (comma-separated, optional)",
+            "client_id": "Meetup OAuth client ID",
+            "member_id": "Meetup member ID",
+            "private_key": "Private key (PEM); leave empty to keep the stored key",
+            "query": "Keyword filter",
+            "include_online": "Include online-only events",
+            "topic_category_ids": "Meetup topic category IDs (optional)",
+            "server": "IMAP server",
+            "port": "IMAP port",
+            "folder": "Folder",
+            "senders": "Sender domains",
+            "lookback_days": "Look back (days)",
+            "parsers": "Parsers to try",
+            "mark_seen": "Mark matched messages as seen"
           }
         }
       },

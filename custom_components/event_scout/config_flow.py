@@ -46,12 +46,19 @@ from .const import (
     DEFAULT_DISTANCE_LIMIT,
     DEFAULT_DISTANCE_METRIC,
     DEFAULT_HORIZON_DAYS,
+    DEFAULT_INCLUDE_ONLINE,
     DEFAULT_INCLUDE_UNLOCATED,
+    DEFAULT_MARK_SEEN,
     DEFAULT_OSRM_URL,
     DEFAULT_RADIUS_MILES,
     DEFAULT_RECONNAISSANCE_DAYS,
     DEFAULT_ROAD_FACTOR,
     DEFAULT_UPDATE_INTERVAL_HOURS,
+    DEFAULT_VENDOR_EMAIL_FOLDER,
+    DEFAULT_VENDOR_EMAIL_LOOKBACK_DAYS,
+    DEFAULT_VENDOR_EMAIL_PARSERS,
+    DEFAULT_VENDOR_EMAIL_PORT,
+    DEFAULT_VENDOR_EMAIL_SENDERS,
     DEFAULT_VENDOR_LEAD_DAYS,
     DISTANCE_METRICS,
     DOMAIN,
@@ -60,10 +67,13 @@ from .const import (
     SOURCE_KIND_ICS,
     SOURCE_KIND_JSONLD,
     SOURCE_KIND_MANUAL,
+    SOURCE_KIND_MEETUP,
     SOURCE_KIND_SOCRATA,
     SOURCE_KIND_TICKETMASTER,
+    SOURCE_KIND_VENDOR_EMAIL,
     SOURCE_KINDS,
     SOURCE_TYPE,
+    VENDOR_EMAIL_PARSERS,
 )
 from .sources import SourceContext, SourceValidationError, get_source
 
@@ -178,6 +188,44 @@ _SOURCE_ARG_SCHEMAS: dict[str, vol.Schema] = {
             vol.Required("category", default="other"): vol.In(CATEGORIES),
         }
     ),
+    SOURCE_KIND_MEETUP: vol.Schema(
+        {
+            vol.Required("name"): str,
+            vol.Required("client_id"): str,
+            vol.Required("member_id"): str,
+            vol.Required("private_key"): selector.TextSelector(
+                selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD, multiline=True)
+            ),
+            vol.Optional("query"): str,
+            vol.Required("category", default="community"): vol.In(CATEGORIES),
+            vol.Optional("include_online", default=DEFAULT_INCLUDE_ONLINE): bool,
+            vol.Optional("topic_category_ids", default=[]): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+        }
+    ),
+    SOURCE_KIND_VENDOR_EMAIL: vol.Schema(
+        {
+            vol.Required("name"): str,
+            vol.Required("server"): str,
+            vol.Optional("port", default=DEFAULT_VENDOR_EMAIL_PORT): vol.Coerce(int),
+            vol.Required("username"): str,
+            vol.Required("password"): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)),
+            vol.Optional("folder", default=DEFAULT_VENDOR_EMAIL_FOLDER): str,
+            vol.Optional("senders", default=DEFAULT_VENDOR_EMAIL_SENDERS): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+            vol.Optional("lookback_days", default=DEFAULT_VENDOR_EMAIL_LOOKBACK_DAYS): vol.Coerce(int),
+            vol.Optional("parsers", default=DEFAULT_VENDOR_EMAIL_PARSERS): [vol.In(VENDOR_EMAIL_PARSERS)],
+            vol.Optional("mark_seen", default=DEFAULT_MARK_SEEN): bool,
+            vol.Required("category", default="festival"): vol.In(CATEGORIES),
+        }
+    ),
+}
+
+# Field names that hold a secret, per source kind. On reconfigure, submitting
+# one of these fields empty keeps the value already stored in the subentry
+# rather than overwriting it with an empty string (docs/design-optional-sources.md
+# section 3).
+_SOURCE_SECRET_FIELDS: dict[str, list[str]] = {
+    SOURCE_KIND_MEETUP: ["private_key"],
+    SOURCE_KIND_VENDOR_EMAIL: ["password"],
 }
 
 
@@ -268,18 +316,48 @@ class SourceSubentryFlow(ConfigSubentryFlow):
         return self.async_show_form(step_id="args", data_schema=schema, errors=errors)
 
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> SubentryFlowResult:
-        """Reconfigure an existing source subentry."""
+        """Reconfigure an existing source subentry.
+
+        An empty submission of a secret field (docs/design-optional-sources.md
+        section 3: `private_key`, `password`) keeps the value already stored
+        for that subentry rather than overwriting it with an empty string.
+        Validate always reruns before saving, exactly like the add step.
+        """
         subentry = self._get_reconfigure_subentry()
         self._kind = subentry.data.get("source_kind")
         assert self._kind is not None
+        errors: dict[str, str] = {}
         schema = _SOURCE_ARG_SCHEMAS[self._kind]
 
         if user_input is not None:
             data = dict(user_input)
+            for field in _SOURCE_SECRET_FIELDS.get(self._kind, []):
+                if not data.get(field):
+                    data[field] = subentry.data.get(field)
+
+            session = async_get_clientsession(self.hass)
+            source = get_source(self._kind, {k: v for k, v in data.items() if k != "name"})
+            ctx = SourceContext(
+                subentry_id=subentry.subentry_id,
+                name=data.get("name", self._kind),
+                category=data.get("category", "other"),
+                latitude=self.hass.config.latitude,
+                longitude=self.hass.config.longitude,
+            )
+            try:
+                await source.async_validate(session, ctx)
+            except SourceValidationError as err:
+                errors["base"] = "cannot_connect"
+                return self.async_show_form(
+                    step_id="reconfigure", data_schema=schema, errors=errors, description_placeholders={"error": str(err)}
+                )
+
+            data.update(source.data)
             data["source_kind"] = self._kind
             return self.async_update_and_abort(self._get_entry(), subentry, title=data.get("name", self._kind), data=data)
 
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(schema, subentry.data),
+            errors=errors,
         )

@@ -11,7 +11,18 @@ from homeassistant.helpers.redact import async_redact_data
 from . import EventScoutConfigEntry
 from .const import CONF_OSRM_URL
 
-TO_REDACT = {"api_key", "password", "app_token", "token", "username", "latitude", "longitude"}
+TO_REDACT = {
+    "api_key",
+    "password",
+    "app_token",
+    "token",
+    "username",
+    "latitude",
+    "longitude",
+    "private_key",
+    "access_token",
+    "cached_access_token",
+}
 
 
 def _redact_osrm_url(url: str | None) -> str | None:
