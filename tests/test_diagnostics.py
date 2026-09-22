@@ -35,3 +35,50 @@ async def test_diagnostics_redacts_secrets(hass) -> None:  # noqa: ANN001
     assert diagnostics["entry_data"]["latitude"] == "**REDACTED**"
     assert diagnostics["subentries"]["sub1"]["api_key"] == "**REDACTED**"
     assert diagnostics["subentries"]["sub1"]["name"] == "Test"
+    assert "excluded_counts" in diagnostics
+    assert "last_osrm_error" in diagnostics
+
+
+async def test_diagnostics_redacts_osrm_url_to_hostname(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="loc2",
+        data={"name": "Loc2"},
+        options={"osrm_url": "https://user:pass@my-osrm.example.com/some/path"},
+    )
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=ScoutData()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    entry.subentries = {}
+    diagnostics = await async_get_config_entry_diagnostics(hass, entry)
+    assert diagnostics["entry_options"]["osrm_url"] == "my-osrm.example.com"
+    assert "user:pass" not in str(diagnostics["entry_options"]["osrm_url"])
+
+
+async def test_diagnostics_redacts_osrm_url_inside_last_error(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="loc3",
+        data={"name": "Loc3"},
+        options={"osrm_url": "https://my-osrm.example.com"},
+    )
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=ScoutData()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    entry.runtime_data.last_osrm_error = "Request to https://my-osrm.example.com/table/v1/driving/... failed"
+    entry.subentries = {}
+    diagnostics = await async_get_config_entry_diagnostics(hass, entry)
+    assert "https://my-osrm.example.com" not in diagnostics["last_osrm_error"]
+    assert "my-osrm.example.com" in diagnostics["last_osrm_error"]

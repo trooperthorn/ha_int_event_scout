@@ -67,6 +67,30 @@ def test_digest_response_shape() -> None:
     assert "markdown" in response
 
 
+def test_render_markdown_groups_by_county_when_requested() -> None:
+    williamson = _event(county="Williamson")
+    travis = _event(county="Travis", source_event_id="2", title="Austin Fest")
+    unknown = _event(county=None, source_event_id="3", title="Mystery Event")
+    markdown = render_markdown([williamson, travis, unknown], [], period="daily", group_by_county=True)
+    assert "### Williamson" in markdown
+    assert "### Travis" in markdown
+    assert "### Unknown county" in markdown
+    assert markdown.index("### Unknown county") > markdown.index("### Williamson")
+
+
+def test_render_markdown_ungrouped_by_default() -> None:
+    event = _event(county="Williamson")
+    markdown = render_markdown([event], [], period="daily")
+    assert "###" not in markdown
+
+
+def test_digest_response_passes_group_by_county() -> None:
+    event = _event(county="Williamson")
+    response = digest_response([event], [], period="daily", group_by_county=True)
+    assert "### Williamson" in response["markdown"]
+    assert response["events"][0]["county"] == "Williamson"
+
+
 def test_notification_payload_includes_actions() -> None:
     vendor = VendorInfo(app_deadline=date(2026, 10, 1), app_url="https://example.com/apply", origin="explicit", confidence=0.9)
     event = _event(vendor=vendor)

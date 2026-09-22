@@ -34,9 +34,7 @@ def _release_files(source: Path) -> list[Path]:
         (
             path
             for path in source.rglob("*")
-            if path.is_file()
-            and not _SKIP_PARTS.intersection(path.relative_to(source).parts)
-            and path.suffix not in {".pyc", ".pyo"}
+            if path.is_file() and not _SKIP_PARTS.intersection(path.relative_to(source).parts) and path.suffix not in {".pyc", ".pyo"}
         ),
         key=lambda path: path.relative_to(source).as_posix(),
     )

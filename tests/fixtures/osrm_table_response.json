@@ -1,0 +1,37 @@
+{
+  "code": "Ok",
+  "distances": [
+    [0, 48280.5, 96561.0]
+  ],
+  "durations": [
+    [0, 2760.2, 5520.4]
+  ],
+  "sources": [
+    {
+      "hint": "source-hint",
+      "distance": 4.2,
+      "name": "",
+      "location": [-97.6779, 30.5083]
+    }
+  ],
+  "destinations": [
+    {
+      "hint": "dest-hint-0",
+      "distance": 4.2,
+      "name": "",
+      "location": [-97.6779, 30.5083]
+    },
+    {
+      "hint": "dest-hint-1",
+      "distance": 11.7,
+      "name": "",
+      "location": [-97.6811, 30.6333]
+    },
+    {
+      "hint": "dest-hint-2",
+      "distance": 8.5,
+      "name": "",
+      "location": [-97.7431, 30.7943]
+    }
+  ]
+}

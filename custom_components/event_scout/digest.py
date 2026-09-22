@@ -27,17 +27,30 @@ def deadlines_for_period(deadlines: list[DeadlineAlert], *, period: str, today: 
     return sorted(selected, key=lambda d: d.when)
 
 
-def render_markdown(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *, period: str) -> str:
-    """Render a digest as markdown."""
+def render_markdown(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *, period: str, group_by_county: bool = False) -> str:
+    """Render a digest as markdown.
+
+    When `group_by_county` is set (the hub has counties configured), events
+    are grouped under a heading per county, with events that have no
+    resolved county listed last under "Unknown county".
+    """
     title = "Daily digest" if period == DIGEST_PERIOD_DAILY else "Weekly digest"
     lines = [f"# {title}", ""]
 
     lines.append("## Events")
-    if events:
+    if not events:
+        lines.append("- No events in this period.")
+    elif group_by_county:
+        groups: dict[str, list[ScoutEvent]] = {}
+        for event in events:
+            groups.setdefault(event.county or "Unknown county", []).append(event)
+        for county in sorted(groups, key=lambda c: (c == "Unknown county", c)):
+            lines.append(f"### {county}")
+            for event in groups[county]:
+                lines.append(f"- {event.start_date.isoformat()}: {event.title} ({event.category})")
+    else:
         for event in events:
             lines.append(f"- {event.start_date.isoformat()}: {event.title} ({event.category})")
-    else:
-        lines.append("- No events in this period.")
 
     lines.append("")
     lines.append("## Vendor deadlines")
@@ -51,7 +64,7 @@ def render_markdown(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *,
     return "\n".join(lines)
 
 
-def digest_response(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *, period: str) -> dict[str, Any]:
+def digest_response(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *, period: str, group_by_county: bool = False) -> dict[str, Any]:
     """Build the structured response for event_scout.get_digest."""
     return {
         "period": period,
@@ -62,6 +75,7 @@ def digest_response(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *,
                 "start": e.start_date.isoformat(),
                 "category": e.category,
                 "url": e.url,
+                "county": e.county,
             }
             for e in events
         ],
@@ -75,7 +89,7 @@ def digest_response(events: list[ScoutEvent], deadlines: list[DeadlineAlert], *,
             }
             for alert in deadlines
         ],
-        "markdown": render_markdown(events, deadlines, period=period),
+        "markdown": render_markdown(events, deadlines, period=period, group_by_county=group_by_county),
     }
 
 
