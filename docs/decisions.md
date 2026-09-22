@@ -147,6 +147,15 @@ always included; off, it is excluded and counted, unless the city criterion
 is enabled and the event's city matches, which is always honored regardless
 of `include_unlocated` since city needs no coordinates to test.
 
+## Release versioning
+
+`manifest.json` versions are CalVer, `YYYY.MM.DD.N`, and `scripts/release_config.py`'s
+`CALVER_RE` requires the daily counter `N` to start at `1`, not `0`; a
+placeholder of `.0` fails release with "Invalid release version". Once the
+release App's credentials are set on this repository, the Prepare release
+workflow will own bumping this counter on every release day; until then it
+is set by hand and must start at `1`.
+
 ## Why no paid routing API
 
 A paid routing API (Google Distance Matrix, Mapbox, HERE) would give exact
