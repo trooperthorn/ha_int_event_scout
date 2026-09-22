@@ -22,7 +22,10 @@ jobs:
       - uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main on 2026-08-30
         with:
           category: integration
-          ignore: ${{ github.ref != 'refs/heads/main' && 'license' || '' }}
+          # This repository stays a custom (non-default-store) HACS repository for now, so
+          # brand assets are not required (see quality_scale.yaml). license is skipped off main
+          # because hacs/action reads license metadata from the default branch only.
+          ignore: brands${{ github.ref != 'refs/heads/main' && ' license' || '' }}
 
   hassfest:
     name: hassfest (manifest sanity)

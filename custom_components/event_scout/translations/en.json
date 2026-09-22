@@ -36,6 +36,10 @@
   "config_subentries": {
     "source": {
       "title": "Event source",
+      "entry_type": "Event source",
+      "initiate_flow": {
+        "user": "Add source"
+      },
       "step": {
         "user": {
           "title": "Choose a source type",
