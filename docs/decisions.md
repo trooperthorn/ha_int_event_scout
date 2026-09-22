@@ -156,6 +156,58 @@ release App's credentials are set on this repository, the Prepare release
 workflow will own bumping this counter on every release day; until then it
 is set by hand and must start at `1`.
 
+## Why Meetup uses the JWT (server to server) OAuth flow
+
+Meetup's GraphQL API supports two OAuth flows for a server-side integration:
+an authorization-code flow that needs a human to click through a consent
+screen (and refresh a token that expires), and a JWT (server to server)
+flow where a registered OAuth client signs its own short-lived assertion
+and exchanges it for an access token with no human interaction, ever. Event
+Scout's coordinator refreshes on a schedule with no one watching, so only
+the JWT flow works unattended; the authorization-code flow would eventually
+fail silently the first time its refresh token expired or was revoked. The
+cost is that creating a JWT OAuth client requires an active Meetup Pro
+subscription (`docs/decisions.md`, "dead or paywalled sources" above), a
+real recurring cost the README states plainly. The integration never asks
+for a Meetup account password; the private key it does ask for is scoped to
+one OAuth client that can be revoked independently of the Meetup account.
+
+## Why the vendor_email source is IMAP, read-only, and TLS-only
+
+ZAPP and FestivalNet have no public API and scraping their paywalled member
+areas is a non-goal (`docs/design.md` section 1, and the "dead or
+paywalled sources" note above). Both vendors already email their deadline
+digests to members who ask for them, so reading that mail the member
+already receives, in a mailbox the member already controls, is the one
+terms-clean path to that data. `sources/vendor_email.py` connects with
+`aioimaplib` over TLS only (no STARTTLS or plaintext option, since the
+credentials on the wire are the member's real mailbox login) and selects
+the configured folder with IMAP `EXAMINE`, never `SELECT`, so the
+connection cannot modify the mailbox even by accident; the only write path
+the source has at all is an explicit `STORE +FLAGS (\Seen)` call, gated
+behind `mark_seen`, which defaults off. Nothing is ever deleted, moved, or
+copied. The README recommends a dedicated app password specifically so a
+compromise of Event Scout's stored credential can be revoked without
+touching the member's real account password.
+
+## Why the vendor_email parsers tolerate mismatch instead of raising
+
+`sources/vendor_email_parsers.py`'s `zapp`, `festivalnet`, and `generic`
+parsers were written from the vendors' own help-page descriptions of their
+digest layout, not from a real captured email, because no ZAPP or
+FestivalNet membership was available at build time
+(`docs/unverified.md`). A layout description is not a guarantee: vendors
+change their templates, and Home Assistant users who do have a real mailbox
+will see real mail whose exact wording drifts from this design doc over
+time. If a parser raised on a line it didn't expect, one unexpected email
+would take down the entire `vendor_email` source's refresh (every other
+message in the same fetch, every other source's own refresh is unaffected
+either way per the coordinator's per-source isolation, but this source's
+own events for that cycle would be lost). Instead, every parser is written
+to fail closed: no match returns an empty list, a match is only ever a net
+addition, and the source logs the miss once at debug level
+(`sources/vendor_email.py`) so the gap is diagnosable without being fatal.
+
 ## Why no paid routing API
 
 A paid routing API (Google Distance Matrix, Mapbox, HERE) would give exact

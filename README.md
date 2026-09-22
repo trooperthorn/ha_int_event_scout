@@ -33,6 +33,8 @@ actionable phone notifications.
 | `socrata` | A city open-data domain, dataset ID, and a field map | See the Austin example below. |
 | `eventbrite` | A personal OAuth token and one or more organizer IDs | Curated organizers only. Eventbrite's public event search shut down in 2019, so this source cannot discover new organizers; it can only poll organizers you already know. |
 | `manual` | A recurring month/day or nth-weekday rule | City birthdays and known recurring festivals that have no feed at all. |
+| `meetup` | A Meetup Pro subscription and a JWT OAuth client | Uses the hub's location and radius. No vendor application data. |
+| `vendor_email` | IMAP access to a mailbox that receives ZAPP and/or FestivalNet digests | Read-only; never deletes, moves, or copies mail. |
 
 ### Socrata example: Austin ACCD Event Listings
 
@@ -57,6 +59,62 @@ The trailing digits after the last hyphen are the organizer ID
 comma-separated, in `organization_ids` when adding an `eventbrite` source.
 The token is a personal OAuth token from your Eventbrite account's API keys
 page.
+
+### Meetup: Pro requirement and creating a JWT client
+
+Meetup's GraphQL API only supports unattended (no human clicking through a
+login) authentication through a JWT (server to server) OAuth client, and
+creating one requires an active **Meetup Pro** subscription; this is a real
+recurring cost, not a one-time setup step. Event Scout never asks for your
+Meetup account password.
+
+To create the client:
+
+1. Sign in to Meetup with a Pro subscription and open your OAuth
+   Consumers page.
+2. Create a new OAuth client and choose the JWT (server to server) grant
+   type.
+3. Meetup issues a **client ID** and asks you to register an **RSA public
+   key**; generate an RSA key pair yourself (for example
+   `openssl genrsa -out meetup.pem 2048` followed by
+   `openssl rsa -in meetup.pem -pubout -out meetup_public.pem`) and paste
+   the public key where Meetup asks for it.
+4. Find your **member ID** on your own Meetup profile page.
+5. When adding a `meetup` source in Event Scout, enter the client ID, your
+   member ID, and paste the **private key** (`meetup.pem`'s contents,
+   including the `-----BEGIN`/`-----END` lines) into `private_key`.
+
+The exact GraphQL argument names `eventSearch` accepts were not verified
+against a live Pro token at build time (`docs/unverified.md`); adding the
+source runs a one-time introspection query against the live schema and
+fails with a clear error if Meetup's schema has changed in a way this
+integration cannot adapt to automatically.
+
+### Vendor email: Gmail and Outlook app passwords
+
+The `vendor_email` source needs IMAP credentials for a mailbox that
+receives ZAPP's weekly deadline digest and/or FestivalNet's Calls for
+Artists newsletter. Using your account's normal password is not
+recommended; both major providers support a scoped **app password**
+instead, so a leaked or revoked Event Scout credential never touches your
+real sign-in:
+
+- **Gmail**: turn on 2-Step Verification, then create an app password
+  from your Google Account's Security settings (App passwords). Use
+  `imap.gmail.com`, port `993`.
+- **Outlook / Microsoft 365**: turn on two-step verification, then create
+  an app password from your Microsoft account's Security settings. Use
+  `outlook.office365.com`, port `993`.
+
+The mailbox is opened **read-only**: the source selects the folder with
+IMAP `EXAMINE`, never `SELECT`, so nothing in the mailbox can be modified.
+The only write it can ever make is marking a matched message as read, and
+only if you explicitly turn on `mark_seen`; by default the source never
+writes to the mailbox at all. No ZAPP or FestivalNet email was available
+at build time, so the `zapp` and `festivalnet` parsers were written from
+each vendor's own help-page description of their digest layout, not a real
+captured email (`docs/unverified.md`); every parser is written to skip a
+message it cannot parse rather than fail the whole refresh.
 
 ## Choosing an area
 
