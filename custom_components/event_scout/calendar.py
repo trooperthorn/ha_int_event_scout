@@ -90,10 +90,28 @@ def _to_calendar_event(scout_event) -> CalendarEvent:  # noqa: ANN001
         start=scout_event.start,
         end=scout_event.end or scout_event.start,
         summary=scout_event.title,
-        description=f"Category: {scout_event.category}",
+        description=_description_lines(scout_event),
         location=scout_event.venue_name,
         uid=scout_event.uid,
     )
+
+
+def _description_lines(scout_event) -> str:  # noqa: ANN001
+    lines = [f"Category: {scout_event.category}"]
+
+    if scout_event.drive_miles is not None and scout_event.drive_minutes is not None:
+        origin = scout_event.distance_origin
+        qualifier = "(estimated)" if origin == "estimated" else "(routed)" if origin == "routed" else ""
+        prefix = "about " if origin == "estimated" else ""
+        line = f"Drive: {prefix}{scout_event.drive_miles:.0f} mi, {prefix}{scout_event.drive_minutes:.0f} min"
+        if qualifier:
+            line = f"{line} {qualifier}"
+        lines.append(line)
+
+    if scout_event.county:
+        lines.append(f"County: {scout_event.county}")
+
+    return "\n".join(lines)
 
 
 def _alert_to_calendar_event(alert) -> CalendarEvent:  # noqa: ANN001

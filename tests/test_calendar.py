@@ -52,6 +52,42 @@ async def test_events_calendar_next_event_property() -> None:
     assert calendar_entity.event is not None
 
 
+async def test_events_calendar_description_includes_drive_and_county() -> None:
+    event = _event(
+        start=date.today() + timedelta(days=5),
+        drive_miles=32.4,
+        drive_minutes=41.1,
+        distance_origin="estimated",
+        county="Williamson",
+    )
+    calendar_entity = EventsCalendar(_FakeCoordinator(ScoutData(events=[event])))
+    assert calendar_entity.event is not None
+    description = calendar_entity.event.description
+    assert "Drive: about 32 mi, about 41 min (estimated)" == description.splitlines()[1]
+    assert "County: Williamson" in description
+
+
+async def test_events_calendar_description_labels_routed_without_about() -> None:
+    event = _event(
+        start=date.today() + timedelta(days=5),
+        drive_miles=32.4,
+        drive_minutes=41.1,
+        distance_origin="routed",
+    )
+    calendar_entity = EventsCalendar(_FakeCoordinator(ScoutData(events=[event])))
+    description = calendar_entity.event.description
+    assert "(routed)" in description
+    assert "about" not in description
+
+
+async def test_events_calendar_description_omits_drive_line_when_absent() -> None:
+    event = _event(start=date.today() + timedelta(days=5))
+    calendar_entity = EventsCalendar(_FakeCoordinator(ScoutData(events=[event])))
+    description = calendar_entity.event.description
+    assert "Drive:" not in description
+    assert "County:" not in description
+
+
 async def test_vendor_deadlines_calendar_get_events() -> None:
     event = _event()
     alerts = [DeadlineAlert(event=event, alert_kind="deadline", when=date(2026, 10, 1), days=14)]

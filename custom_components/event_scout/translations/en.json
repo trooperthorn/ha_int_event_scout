@@ -1,4 +1,19 @@
 {
+  "selector": {
+    "area_mode": {
+      "options": {
+        "any": "Any (match any criterion)",
+        "all": "All (match every enabled criterion)"
+      }
+    },
+    "distance_metric": {
+      "options": {
+        "straight_line": "Straight line",
+        "driving_miles": "Driving miles",
+        "driving_minutes": "Driving minutes"
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {
@@ -28,7 +43,23 @@
           "reconnaissance_days": "Reconnaissance lead time (days)",
           "digest_time": "Daily digest time (HH:MM)",
           "categories": "Categories to include",
-          "target_calendar": "Calendar entity for Add to calendar actions"
+          "target_calendar": "Calendar entity for Add to calendar actions",
+          "area_mode": "Combine area criteria as",
+          "cities": "Cities",
+          "counties": "Counties",
+          "distance_metric": "Distance metric",
+          "distance_limit": "Distance limit (miles, or minutes for driving minutes)",
+          "road_factor": "Road factor (estimate tier)",
+          "average_speed_mph": "Average speed, mph (estimate tier)",
+          "osrm_url": "OSRM server URL (routed tier; leave empty for the estimate tier)",
+          "include_unlocated": "Include events with no coordinates"
+        },
+        "data_description": {
+          "cities": "Case-insensitive match on the event's city. Leave empty to disable this criterion.",
+          "counties": "Match on the county resolved from the event's coordinates, without the word County. Leave empty to disable this criterion.",
+          "distance_limit": "0 disables the distance criterion.",
+          "osrm_url": "The public OSRM demo server has no service guarantee; a self-hosted server is recommended for regular use. See the README for the demo server's address.",
+          "include_unlocated": "When on (default), events from sources other than manual that have no coordinates are always included, except manual events which always pass regardless of this option. When off, such events are excluded and counted under excluded_counts.no_coordinates unless their city matches a configured city."
         }
       }
     }
@@ -78,7 +109,20 @@
             "vendor_url": "Vendor application URL",
             "token": "Private token",
             "organization_ids": "Organizer IDs (comma-separated)",
-            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+            "venue_ids": "Venue IDs to include (comma-separated, optional)",
+            "client_id": "Meetup OAuth client ID",
+            "member_id": "Meetup member ID",
+            "private_key": "Private key (PEM)",
+            "query": "Keyword filter",
+            "include_online": "Include online-only events",
+            "topic_category_ids": "Meetup topic category IDs (optional)",
+            "server": "IMAP server",
+            "port": "IMAP port",
+            "folder": "Folder",
+            "senders": "Sender domains",
+            "lookback_days": "Look back (days)",
+            "parsers": "Parsers to try",
+            "mark_seen": "Mark matched messages as seen"
           }
         },
         "reconfigure": {
@@ -88,7 +132,7 @@
             "url": "URL",
             "category": "Category",
             "username": "Username",
-            "password": "Password",
+            "password": "Password; leave empty to keep the stored password",
             "vendor_probe": "Probe the event's site for vendor application pages",
             "api_key": "API key",
             "segments": "Ticketmaster segments",
@@ -112,7 +156,20 @@
             "vendor_url": "Vendor application URL",
             "token": "Private token",
             "organization_ids": "Organizer IDs (comma-separated)",
-            "venue_ids": "Venue IDs to include (comma-separated, optional)"
+            "venue_ids": "Venue IDs to include (comma-separated, optional)",
+            "client_id": "Meetup OAuth client ID",
+            "member_id": "Meetup member ID",
+            "private_key": "Private key (PEM); leave empty to keep the stored key",
+            "query": "Keyword filter",
+            "include_online": "Include online-only events",
+            "topic_category_ids": "Meetup topic category IDs (optional)",
+            "server": "IMAP server",
+            "port": "IMAP port",
+            "folder": "Folder",
+            "senders": "Sender domains",
+            "lookback_days": "Look back (days)",
+            "parsers": "Parsers to try",
+            "mark_seen": "Mark matched messages as seen"
           }
         }
       },

@@ -9,8 +9,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import STORE_KEY_PREFIX, STORE_VERSION
+from .const import ROUTE_CACHE_MAX_AGE_DAYS, STORE_KEY_PREFIX, STORE_VERSION
 from .models import VendorInfo
+
+
+def _round_coord_key(lat: float, lon: float) -> str:
+    """Return the cache key for a coordinate, rounded to three decimals (about 100 m)."""
+    return f"{round(lat, 3)},{round(lon, 3)}"
 
 
 class EventScoutStore:
@@ -24,6 +29,8 @@ class EventScoutStore:
             "series_offsets": {},
             "overrides": {},
             "dismissed": {},
+            "county_cache": {},
+            "route_cache": {},
         }
 
     async def async_load(self) -> None:
@@ -31,7 +38,7 @@ class EventScoutStore:
         stored = await self._store.async_load()
         if stored:
             self._data.update(stored)
-            for key in ("uid_aliases", "series_offsets", "overrides", "dismissed"):
+            for key in ("uid_aliases", "series_offsets", "overrides", "dismissed", "county_cache", "route_cache"):
                 self._data.setdefault(key, {})
 
     async def async_save(self) -> None:
@@ -91,6 +98,42 @@ class EventScoutStore:
         """Return the raw dismissed-tag mapping."""
         return dict(self._data["dismissed"])
 
+    def get_county(self, lat: float, lon: float) -> Any:
+        """Return a cached county lookup for a coordinate.
+
+        Returns the sentinel `MISSING` when there is no cache entry yet
+        (as opposed to a cached "unresolved" result, which is stored as None).
+        """
+        key = _round_coord_key(lat, lon)
+        if key not in self._data["county_cache"]:
+            return MISSING
+        return self._data["county_cache"][key]
+
+    def set_county(self, lat: float, lon: float, county: str | None) -> None:
+        """Cache a county lookup for a coordinate, forever (the geocoder result does not change)."""
+        self._data["county_cache"][_round_coord_key(lat, lon)] = county
+
+    def get_route(self, lat: float, lon: float) -> dict[str, Any] | None:
+        """Return a cached OSRM route result for a coordinate, if fresh enough."""
+        entry = self._data["route_cache"].get(_round_coord_key(lat, lon))
+        if entry is None:
+            return None
+        cached_at = parse_iso(entry.get("cached_at"))
+        if cached_at is None:
+            return None
+        age_days = (dt_util.utcnow() - cached_at).days
+        if age_days > ROUTE_CACHE_MAX_AGE_DAYS:
+            return None
+        return entry
+
+    def set_route(self, lat: float, lon: float, *, drive_miles: float, drive_minutes: float) -> None:
+        """Cache an OSRM route result for a coordinate."""
+        self._data["route_cache"][_round_coord_key(lat, lon)] = {
+            "drive_miles": drive_miles,
+            "drive_minutes": drive_minutes,
+            "cached_at": dt_util.utcnow().isoformat(),
+        }
+
     def as_diagnostics(self) -> dict[str, Any]:
         """Return a redaction-safe summary for diagnostics."""
         return {
@@ -98,7 +141,20 @@ class EventScoutStore:
             "series_offset_count": len(self._data["series_offsets"]),
             "override_count": len(self._data["overrides"]),
             "dismissed_count": len(self._data["dismissed"]),
+            "county_cache_count": len(self._data["county_cache"]),
+            "route_cache_count": len(self._data["route_cache"]),
         }
+
+
+class _MissingType:
+    """Sentinel type distinguishing an absent cache entry from a cached None."""
+
+    def __repr__(self) -> str:
+        """Return a readable sentinel repr for debugging."""
+        return "MISSING"
+
+
+MISSING = _MissingType()
 
 
 def utcnow_iso() -> str:

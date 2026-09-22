@@ -7,16 +7,20 @@ from ..const import (
     SOURCE_KIND_ICS,
     SOURCE_KIND_JSONLD,
     SOURCE_KIND_MANUAL,
+    SOURCE_KIND_MEETUP,
     SOURCE_KIND_SOCRATA,
     SOURCE_KIND_TICKETMASTER,
+    SOURCE_KIND_VENDOR_EMAIL,
 )
 from .base import Source, SourceContext, SourceValidationError
 from .eventbrite import EventbriteSource
 from .ics import IcsSource
 from .jsonld import JsonLdSource
 from .manual import ManualSource
+from .meetup import MeetupSource
 from .socrata import SocrataSource
 from .ticketmaster import TicketmasterSource
+from .vendor_email import VendorEmailSource
 
 SOURCES: dict[str, type[Source]] = {
     SOURCE_KIND_ICS: IcsSource,
@@ -25,6 +29,8 @@ SOURCES: dict[str, type[Source]] = {
     SOURCE_KIND_SOCRATA: SocrataSource,
     SOURCE_KIND_MANUAL: ManualSource,
     SOURCE_KIND_EVENTBRITE: EventbriteSource,
+    SOURCE_KIND_MEETUP: MeetupSource,
+    SOURCE_KIND_VENDOR_EMAIL: VendorEmailSource,
 }
 
 

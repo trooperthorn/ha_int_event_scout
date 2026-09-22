@@ -38,7 +38,7 @@ def parse_calver(value: str) -> tuple[date, int]:
 def next_calver(existing: list[str], release_date: date, prefix: str) -> str:
     sequences: list[int] = []
     for value in existing:
-        bare = value[len(prefix):] if prefix and value.startswith(prefix) else value
+        bare = value[len(prefix) :] if prefix and value.startswith(prefix) else value
         try:
             version_date, sequence = parse_calver(bare)
         except ValueError:

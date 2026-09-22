@@ -48,6 +48,39 @@ async def test_options_flow_updates_options(hass) -> None:  # noqa: ANN001
     assert entry.options["notify_service"] == "mobile_app_phone"
 
 
+async def test_options_flow_accepts_area_filter_fields(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="area event scout", data={"name": "Area Event Scout"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=_empty_scout_data()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result2 = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {
+            "area_mode": "all",
+            "cities": ["Georgetown", "Round Rock"],
+            "counties": ["Williamson"],
+            "distance_metric": "driving_minutes",
+            "distance_limit": 45,
+            "road_factor": 1.25,
+            "average_speed_mph": 40,
+            "osrm_url": "https://router.project-osrm.org",
+        },
+    )
+    assert result2["type"] == "create_entry"
+    assert entry.options["area_mode"] == "all"
+    assert entry.options["cities"] == ["Georgetown", "Round Rock"]
+    assert entry.options["counties"] == ["Williamson"]
+    assert entry.options["distance_metric"] == "driving_minutes"
+    assert entry.options["distance_limit"] == 45
+
+
 async def test_source_subentry_flow_manual(hass) -> None:  # noqa: ANN001
     entry = MockConfigEntry(domain=DOMAIN, unique_id="my event scout", data={"name": "My Event Scout"})
     entry.add_to_hass(hass)
@@ -71,6 +104,129 @@ async def test_source_subentry_flow_manual(hass) -> None:  # noqa: ANN001
         {"name": "Founders Day", "title": "Founders Day", "category": "city_anniversary", "month": 12, "day": 27},
     )
     assert result3["type"] == "create_entry"
+
+
+async def test_source_subentry_flow_meetup(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="meetup event scout", data={"name": "Meetup Event Scout"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=_empty_scout_data()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, "source"), context={"source": config_entries.SOURCE_USER})
+    result2 = await hass.config_entries.subentries.async_configure(result["flow_id"], {"source_kind": "meetup"})
+    assert result2["step_id"] == "args"
+
+    with patch(
+        "custom_components.event_scout.sources.meetup.MeetupSource.async_validate",
+        AsyncMock(return_value=None),
+    ):
+        result3 = await hass.config_entries.subentries.async_configure(
+            result2["flow_id"],
+            {
+                "name": "Austin Meetup",
+                "client_id": "client-123",
+                "member_id": "member-456",
+                "private_key": "-----BEGIN PRIVATE KEY-----\nfake\n-----END PRIVATE KEY-----",
+                "category": "community",
+            },
+        )
+    assert result3["type"] == "create_entry"
+
+
+async def test_source_subentry_flow_vendor_email(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="vendor email event scout", data={"name": "Vendor Email Event Scout"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=_empty_scout_data()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    result = await hass.config_entries.subentries.async_init((entry.entry_id, "source"), context={"source": config_entries.SOURCE_USER})
+    result2 = await hass.config_entries.subentries.async_configure(result["flow_id"], {"source_kind": "vendor_email"})
+    assert result2["step_id"] == "args"
+
+    with patch(
+        "custom_components.event_scout.sources.vendor_email.VendorEmailSource.async_validate",
+        AsyncMock(return_value=None),
+    ):
+        result3 = await hass.config_entries.subentries.async_configure(
+            result2["flow_id"],
+            {
+                "name": "Vendor mail",
+                "server": "imap.gmail.com",
+                "username": "me@example.com",
+                "password": "app-password",
+                "category": "festival",
+            },
+        )
+    assert result3["type"] == "create_entry"
+    subentry = next(iter(entry.subentries.values()))
+    assert subentry.data["password"] == "app-password"
+
+
+async def test_reconfigure_keeps_stored_secret_when_field_submitted_empty(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="reconfig event scout", data={"name": "Reconfig Event Scout"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=_empty_scout_data()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    with patch(
+        "custom_components.event_scout.sources.vendor_email.VendorEmailSource.async_validate",
+        AsyncMock(return_value=None),
+    ):
+        result = await hass.config_entries.subentries.async_init((entry.entry_id, "source"), context={"source": config_entries.SOURCE_USER})
+        result2 = await hass.config_entries.subentries.async_configure(result["flow_id"], {"source_kind": "vendor_email"})
+        await hass.config_entries.subentries.async_configure(
+            result2["flow_id"],
+            {
+                "name": "Vendor mail",
+                "server": "imap.gmail.com",
+                "username": "me@example.com",
+                "password": "original-password",
+                "category": "festival",
+            },
+        )
+
+    subentry = next(iter(entry.subentries.values()))
+    assert subentry.data["password"] == "original-password"
+
+    with patch(
+        "custom_components.event_scout.sources.vendor_email.VendorEmailSource.async_validate",
+        AsyncMock(return_value=None),
+    ) as mock_validate:
+        reconfigure_result = await hass.config_entries.subentries.async_init(
+            (entry.entry_id, "source"),
+            context={"source": "reconfigure", "subentry_id": subentry.subentry_id},
+        )
+        final = await hass.config_entries.subentries.async_configure(
+            reconfigure_result["flow_id"],
+            {
+                "name": "Vendor mail",
+                "server": "imap.outlook.com",
+                "username": "me@example.com",
+                "password": "",
+                "category": "festival",
+            },
+        )
+
+    assert final["type"] == "abort"
+    assert mock_validate.await_count == 1
+    updated_subentry = next(iter(entry.subentries.values()))
+    assert updated_subentry.data["password"] == "original-password"
+    assert updated_subentry.data["server"] == "imap.outlook.com"
 
 
 def _empty_scout_data():

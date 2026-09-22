@@ -1,0 +1,50 @@
+{
+  "result": {
+    "input": {
+      "location": {
+        "x": -97.6779,
+        "y": 30.5083
+      },
+      "benchmark": {
+        "id": "4",
+        "benchmarkName": "Public_AR_Current",
+        "benchmarkDescription": "Public Address Ranges - Current Benchmark",
+        "isDefault": true
+      },
+      "vintage": {
+        "id": "4",
+        "vintageName": "Current_Current",
+        "vintageDescription": "Current Vintage - Current Benchmark",
+        "isDefault": true
+      }
+    },
+    "geographies": {
+      "Counties": [
+        {
+          "GEOID": "48491",
+          "CENTLAT": "+30.6210731",
+          "STATE": "48",
+          "BASENAME": "Williamson",
+          "OID": "204877516815041",
+          "LSADC": "06",
+          "FUNCSTAT": "A",
+          "INTPTLAT": "+30.6280897",
+          "NAME": "Williamson County",
+          "OBJECTID": 1743,
+          "CENTLON": "-097.6207310",
+          "COUNTYNS": "01384000",
+          "COUNTY": "491",
+          "INTPTLON": "-097.6221351"
+        }
+      ],
+      "States": [
+        {
+          "GEOID": "48",
+          "BASENAME": "Texas",
+          "NAME": "Texas",
+          "STATE": "48"
+        }
+      ]
+    }
+  }
+}

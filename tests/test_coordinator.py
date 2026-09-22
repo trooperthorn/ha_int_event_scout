@@ -14,7 +14,13 @@ from custom_components.event_scout.coordinator import EventScoutCoordinator
 
 
 async def test_coordinator_marks_source_failure_without_failing_others(hass) -> None:  # noqa: ANN001
-    entry = MockConfigEntry(domain=DOMAIN, unique_id="loc", data={"name": "Loc", "horizon_days": 90, "radius_miles": 50})
+    # distance_limit=0 disables the area filter's distance criterion so this
+    # test isn't affected by the legacy radius_miles seeding (coordinate-less
+    # manual events only match by city otherwise; see area.py and
+    # docs/design-area-filter.md section 1).
+    entry = MockConfigEntry(
+        domain=DOMAIN, unique_id="loc", data={"name": "Loc", "horizon_days": 90, "radius_miles": 50}, options={"distance_limit": 0}
+    )
     entry.add_to_hass(hass)
     entry.runtime_data = None
 
@@ -55,7 +61,9 @@ async def test_coordinator_raises_update_failed_when_every_source_fails(hass) ->
 
 
 async def test_coordinator_applies_heuristic_vendor_when_no_explicit(hass) -> None:  # noqa: ANN001
-    entry = MockConfigEntry(domain=DOMAIN, unique_id="loc2", data={"name": "Loc2", "horizon_days": 120, "radius_miles": 50})
+    entry = MockConfigEntry(
+        domain=DOMAIN, unique_id="loc2", data={"name": "Loc2", "horizon_days": 120, "radius_miles": 50}, options={"distance_limit": 0}
+    )
     entry.add_to_hass(hass)
 
     coordinator = EventScoutCoordinator(hass, entry, update_interval=timedelta(hours=6))
