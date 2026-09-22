@@ -13,8 +13,8 @@ def _event(**overrides) -> ScoutEvent:  # noqa: ANN003
     defaults = dict(
         uid="u1",
         series_key="s1",
-        source_kind="manual",
-        source_name="Manual",
+        source_kind="ics",
+        source_name="ICS",
         source_event_id="e1",
         title="Test Event",
         start=date(2026, 10, 1),
@@ -112,10 +112,34 @@ def test_no_coordinate_event_matches_only_by_city() -> None:
 
 
 def test_no_coordinate_event_excluded_reason_when_only_distance_configured() -> None:
-    area_filter = AreaFilter(mode="any", cities=[], counties=[], distance_metric="straight_line", distance_limit=30)
+    area_filter = AreaFilter(mode="any", cities=[], counties=[], distance_metric="straight_line", distance_limit=30, include_unlocated=False)
     decision = area_filter.decide(_event(latitude=None, longitude=None, distance_miles=None))
     assert decision.included is False
     assert decision.reason == EXCLUDED_REASON_NO_COORDINATES
+
+
+def test_no_coordinate_event_included_by_default_when_include_unlocated_true() -> None:
+    area_filter = AreaFilter(mode="any", cities=[], counties=[], distance_metric="straight_line", distance_limit=30)
+    decision = area_filter.decide(_event(latitude=None, longitude=None, distance_miles=None))
+    assert decision.included is True
+
+
+def test_manual_source_always_passes_regardless_of_area_criteria() -> None:
+    area_filter = AreaFilter(
+        mode="any", cities=["austin"], counties=[], distance_metric="straight_line", distance_limit=0, include_unlocated=False
+    )
+    decision = area_filter.decide(_event(source_kind="manual", city="Georgetown", latitude=None, longitude=None, distance_miles=None))
+    assert decision.included is True
+    assert decision.matched == []
+
+
+def test_no_coordinate_event_city_match_always_included_even_with_include_unlocated_off() -> None:
+    area_filter = AreaFilter(
+        mode="any", cities=["georgetown"], counties=[], distance_metric="straight_line", distance_limit=0, include_unlocated=False
+    )
+    decision = area_filter.decide(_event(city="Georgetown", latitude=None, longitude=None, distance_miles=None))
+    assert decision.included is True
+    assert decision.matched == ["city"]
 
 
 def test_county_unresolved_reason_when_coordinates_present_but_county_none() -> None:

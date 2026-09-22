@@ -129,6 +129,24 @@ The README's "Choosing an area" section and this note are how that trade-off
 is surfaced; there is no way to make "match nothing extra by default" and
 "seed the existing radius as a working distance filter" both true at once.
 
+## Manual events always pass the area filter; include_unlocated controls the rest
+
+PR #10's first cut excluded any coordinate-less event once a county or
+distance criterion was enabled, with no way to opt back in except adding a
+matching city. Two problems: a `manual` source event (a city birthday, a
+known recurring festival) is user curated, entered by hand specifically
+because Sean wants to see it, and should never be silently dropped by a
+filter meant for automatically discovered events. And for every other
+source, defaulting to "excluded" on upgrade was a worse default than
+"included, but counted" (`excluded_counts.no_coordinates`), since most
+households would rather see an event they have to double check than lose it
+without noticing. `area.py: AreaFilter.decide` now special-cases
+`source_kind == "manual"` to always include, and adds `include_unlocated`
+(default `True`) for every other source: on, a coordinate-less event is
+always included; off, it is excluded and counted, unless the city criterion
+is enabled and the event's city matches, which is always honored regardless
+of `include_unlocated` since city needs no coordinates to test.
+
 ## Why no paid routing API
 
 A paid routing API (Google Distance Matrix, Mapbox, HERE) would give exact

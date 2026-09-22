@@ -29,6 +29,7 @@ from .const import (
     CONF_DISTANCE_LIMIT,
     CONF_DISTANCE_METRIC,
     CONF_HORIZON_DAYS,
+    CONF_INCLUDE_UNLOCATED,
     CONF_NOTIFY_SERVICE,
     CONF_OSRM_URL,
     CONF_RADIUS_MILES,
@@ -45,6 +46,7 @@ from .const import (
     DEFAULT_DISTANCE_LIMIT,
     DEFAULT_DISTANCE_METRIC,
     DEFAULT_HORIZON_DAYS,
+    DEFAULT_INCLUDE_UNLOCATED,
     DEFAULT_OSRM_URL,
     DEFAULT_RADIUS_MILES,
     DEFAULT_RECONNAISSANCE_DAYS,
@@ -106,6 +108,7 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(CONF_OSRM_URL, default=DEFAULT_OSRM_URL): selector.TextSelector(
             selector.TextSelectorConfig(type=selector.TextSelectorType.URL)
         ),
+        vol.Optional(CONF_INCLUDE_UNLOCATED, default=DEFAULT_INCLUDE_UNLOCATED): bool,
     }
 )
 

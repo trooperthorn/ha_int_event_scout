@@ -10,6 +10,7 @@ from .const import (
     EXCLUDED_REASON_COUNTY_UNRESOLVED,
     EXCLUDED_REASON_NO_COORDINATES,
     EXCLUDED_REASON_OUTSIDE_AREA,
+    SOURCE_KIND_MANUAL,
 )
 from .models import ScoutEvent
 
@@ -40,6 +41,7 @@ class AreaFilter:
         counties: list[str],
         distance_metric: str,
         distance_limit: float,
+        include_unlocated: bool = True,
     ) -> None:
         """Store the configured criteria, normalized for case-insensitive matching."""
         self._mode = mode
@@ -47,6 +49,7 @@ class AreaFilter:
         self._counties = {c.strip().lower() for c in counties if c.strip()}
         self._distance_metric = distance_metric
         self._distance_limit = distance_limit
+        self._include_unlocated = include_unlocated
 
     @property
     def has_any_criterion(self) -> bool:
@@ -60,6 +63,9 @@ class AreaFilter:
         only apply when the event has coordinates; without them those two
         criteria simply never match for that event, per design section 1.
         """
+        if event.source_kind == SOURCE_KIND_MANUAL:
+            return AreaDecision(included=True, matched=[])
+
         if not self.has_any_criterion:
             return AreaDecision(included=True, matched=[])
 
@@ -93,8 +99,11 @@ class AreaFilter:
         if included:
             return AreaDecision(included=True, matched=matched)
 
-        if not has_coordinates and (county_enabled or distance_enabled) and not city_matched:
-            return AreaDecision(included=False, matched=matched, reason=EXCLUDED_REASON_NO_COORDINATES)
+        if not has_coordinates and not city_matched:
+            if self._include_unlocated:
+                return AreaDecision(included=True, matched=matched)
+            if county_enabled or distance_enabled:
+                return AreaDecision(included=False, matched=matched, reason=EXCLUDED_REASON_NO_COORDINATES)
 
         if county_enabled and has_coordinates and event.county is None and not city_matched and not distance_matched:
             return AreaDecision(included=False, matched=matched, reason=EXCLUDED_REASON_COUNTY_UNRESOLVED)

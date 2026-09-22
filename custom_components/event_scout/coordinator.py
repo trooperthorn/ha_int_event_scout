@@ -24,6 +24,7 @@ from .const import (
     CONF_DISTANCE_LIMIT,
     CONF_DISTANCE_METRIC,
     CONF_HORIZON_DAYS,
+    CONF_INCLUDE_UNLOCATED,
     CONF_OSRM_URL,
     CONF_RADIUS_MILES,
     CONF_RECONNAISSANCE_DAYS,
@@ -36,6 +37,7 @@ from .const import (
     DEFAULT_DISTANCE_LIMIT,
     DEFAULT_DISTANCE_METRIC,
     DEFAULT_HORIZON_DAYS,
+    DEFAULT_INCLUDE_UNLOCATED,
     DEFAULT_OSRM_URL,
     DEFAULT_RADIUS_MILES,
     DEFAULT_RECONNAISSANCE_DAYS,
@@ -210,6 +212,7 @@ class EventScoutCoordinator(DataUpdateCoordinator[ScoutData]):
         cities = options.get(CONF_CITIES, DEFAULT_CITIES)
         counties = options.get(CONF_COUNTIES, DEFAULT_COUNTIES)
         area_mode = options.get(CONF_AREA_MODE, DEFAULT_AREA_MODE)
+        include_unlocated = options.get(CONF_INCLUDE_UNLOCATED, DEFAULT_INCLUDE_UNLOCATED)
 
         area_filter = AreaFilter(
             mode=area_mode,
@@ -217,6 +220,7 @@ class EventScoutCoordinator(DataUpdateCoordinator[ScoutData]):
             counties=counties,
             distance_metric=distance_metric,
             distance_limit=distance_limit,
+            include_unlocated=include_unlocated,
         )
 
         with_geo: list[ScoutEvent] = []

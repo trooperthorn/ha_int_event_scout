@@ -17,8 +17,8 @@ def _event(uid: str, *, city=None, lat=None, lon=None) -> ScoutEvent:  # noqa: A
     return ScoutEvent(
         uid=uid,
         series_key=f"series-{uid}",
-        source_kind="manual",
-        source_name="Manual",
+        source_kind="ics",
+        source_name="ICS",
         source_event_id=uid,
         title=f"Event {uid}",
         start=date.today() + timedelta(days=5),
@@ -110,6 +110,56 @@ async def test_apply_area_filter_uses_routed_tier_on_success(hass) -> None:  # n
 
     assert len(filtered) == 1
     assert filtered[0].distance_origin == "routed"
+
+
+async def test_apply_area_filter_excludes_unlocated_when_include_unlocated_off(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="area5",
+        data={"name": "Area5", "horizon_days": 90, "radius_miles": 50},
+        options={"distance_metric": "straight_line", "distance_limit": 10, "cities": [], "counties": [], "include_unlocated": False},
+    )
+    entry.add_to_hass(hass)
+    coordinator = EventScoutCoordinator(hass, entry, update_interval=timedelta(hours=6))
+    await coordinator._async_setup()
+
+    events = [_event("no_coords")]
+
+    session = FakeSession()
+    filtered, excluded_counts = await coordinator._apply_area_filter(events, session=session, hub_lat=30.5083, hub_lon=-97.6779)
+
+    assert filtered == []
+    assert excluded_counts.get("no_coordinates") == 1
+
+
+async def test_apply_area_filter_always_includes_manual_events(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="area6",
+        data={"name": "Area6", "horizon_days": 90, "radius_miles": 50},
+        options={"distance_metric": "straight_line", "distance_limit": 10, "cities": [], "counties": [], "include_unlocated": False},
+    )
+    entry.add_to_hass(hass)
+    coordinator = EventScoutCoordinator(hass, entry, update_interval=timedelta(hours=6))
+    await coordinator._async_setup()
+
+    manual_event = ScoutEvent(
+        uid="manual1",
+        series_key="series-manual1",
+        source_kind="manual",
+        source_name="Manual",
+        source_event_id="manual1",
+        title="Birthday",
+        start=date.today() + timedelta(days=5),
+        latitude=32.0,
+        longitude=-96.0,
+    )
+
+    session = FakeSession()
+    filtered, excluded_counts = await coordinator._apply_area_filter([manual_event], session=session, hub_lat=30.5083, hub_lon=-97.6779)
+
+    assert len(filtered) == 1
+    assert excluded_counts == {}
 
 
 async def test_apply_area_filter_resolves_county_when_configured(hass) -> None:  # noqa: ANN001

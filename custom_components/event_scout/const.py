@@ -29,6 +29,7 @@ CONF_DISTANCE_LIMIT: Final = "distance_limit"
 CONF_ROAD_FACTOR: Final = "road_factor"
 CONF_AVERAGE_SPEED_MPH: Final = "average_speed_mph"
 CONF_OSRM_URL: Final = "osrm_url"
+CONF_INCLUDE_UNLOCATED: Final = "include_unlocated"
 
 AREA_MODE_ANY: Final = "any"
 AREA_MODE_ALL: Final = "all"
@@ -59,6 +60,7 @@ DEFAULT_DISTANCE_LIMIT: Final = 50
 DEFAULT_ROAD_FACTOR: Final = 1.3
 DEFAULT_AVERAGE_SPEED_MPH: Final = 45
 DEFAULT_OSRM_URL: Final = ""
+DEFAULT_INCLUDE_UNLOCATED: Final = True
 
 CENSUS_GEOCODER_URL: Final = (
     "https://geocoding.geo.census.gov/geocoder/geographies/coordinates"

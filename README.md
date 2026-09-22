@@ -80,6 +80,16 @@ keeps every event within the horizon.
   county; they can still match by city. The `excluded_counts` sensor
   attribute reports how many events were left out for each reason,
   including lacking coordinates, so the gap stays visible.
+- **Manual events always pass.** Events from a `manual` source (city
+  birthdays, known recurring festivals you entered yourself) are user
+  curated and always included, regardless of the area criteria.
+- **Coordinate-less events from other sources** are controlled by
+  `include_unlocated` (default on). When on, an event from any source other
+  than `manual` that has no coordinates is included even if it does not
+  match a configured city. When off, such an event is excluded and counted
+  under `excluded_counts.no_coordinates`, unless the city criterion is
+  enabled and the event's city matches a configured city, in which case it
+  is always included regardless of `include_unlocated`.
 
 ### The estimated distance tier (default)
 
