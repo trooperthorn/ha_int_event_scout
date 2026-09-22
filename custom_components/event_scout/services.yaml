@@ -1,0 +1,83 @@
+get_digest:
+  fields:
+    period:
+      required: true
+      example: "daily"
+      selector:
+        select:
+          options:
+            - "daily"
+            - "weekly"
+    categories:
+      required: false
+      selector:
+        select:
+          multiple: true
+          options:
+            - "festival"
+            - "family"
+            - "city_anniversary"
+            - "community"
+            - "other"
+
+send_digest:
+  fields:
+    period:
+      required: true
+      example: "daily"
+      selector:
+        select:
+          options:
+            - "daily"
+            - "weekly"
+    categories:
+      required: false
+      selector:
+        select:
+          multiple: true
+          options:
+            - "festival"
+            - "family"
+            - "city_anniversary"
+            - "community"
+            - "other"
+
+send_alerts: {}
+
+set_vendor_info:
+  fields:
+    uid:
+      required: true
+      example: "ics:austin-fest:12345"
+      selector:
+        text:
+    available:
+      required: false
+      selector:
+        select:
+          options:
+            - "yes"
+            - "no"
+            - "unknown"
+    app_open:
+      required: false
+      selector:
+        date:
+    app_deadline:
+      required: false
+      selector:
+        date:
+    app_url:
+      required: false
+      selector:
+        text:
+    booth_fee_text:
+      required: false
+      selector:
+        text:
+    jury_fee_text:
+      required: false
+      selector:
+        text:
+
+refresh: {}
