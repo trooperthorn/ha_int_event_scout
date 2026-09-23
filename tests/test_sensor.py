@@ -14,15 +14,16 @@ from custom_components.event_scout.sensor import (
 
 
 class _Entry:
-    def __init__(self) -> None:
+    def __init__(self, options: dict | None = None) -> None:
         self.entry_id = "entry1"
         self.title = "Event Scout"
+        self.options = options or {}
 
 
 class _FakeCoordinator:
-    def __init__(self, data: ScoutData) -> None:
+    def __init__(self, data: ScoutData, options: dict | None = None) -> None:
         self.data = data
-        self.config_entry = _Entry()
+        self.config_entry = _Entry(options)
 
 
 def _event(**overrides) -> ScoutEvent:
@@ -45,6 +46,16 @@ def test_upcoming_events_sensor_counts_by_category() -> None:
     sensor = UpcomingEventsSensor(_FakeCoordinator(ScoutData(events=events)))
     assert sensor.native_value == 2
     assert sensor.extra_state_attributes["by_category"] == {"festival": 1, "family": 1}
+
+
+def test_upcoming_events_sensor_reports_excluded_counts_and_area_summary() -> None:
+    data = ScoutData(events=[_event()], excluded_counts={"outside_area": 3, "no_coordinates": 1})
+    options = {"counties": ["williamson"], "distance_limit": 40, "distance_metric": "driving_miles"}
+    sensor = UpcomingEventsSensor(_FakeCoordinator(data, options))
+    attrs = sensor.extra_state_attributes
+    assert attrs["excluded_counts"] == {"outside_area": 3, "no_coordinates": 1}
+    assert "Williamson" in attrs["area_summary"]
+    assert "estimated" in attrs["area_summary"] or "driving" in attrs["area_summary"]
 
 
 def test_next_vendor_deadline_sensor() -> None:

@@ -10,7 +10,21 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import EventScoutConfigEntry
-from .const import ALERT_KIND_DEADLINE, VENDOR_AVAILABLE_YES
+from .area import AreaFilter
+from .const import (
+    ALERT_KIND_DEADLINE,
+    CONF_AREA_MODE,
+    CONF_CITIES,
+    CONF_COUNTIES,
+    CONF_DISTANCE_LIMIT,
+    CONF_DISTANCE_METRIC,
+    DEFAULT_AREA_MODE,
+    DEFAULT_CITIES,
+    DEFAULT_COUNTIES,
+    DEFAULT_DISTANCE_LIMIT,
+    DEFAULT_DISTANCE_METRIC,
+    VENDOR_AVAILABLE_YES,
+)
 from .entity import EventScoutEntity
 
 PARALLEL_UPDATES = 0
@@ -56,7 +70,20 @@ class UpcomingEventsSensor(EventScoutEntity, SensorEntity):
         for event in self.coordinator.data.events:
             by_category[event.category] = by_category.get(event.category, 0) + 1
         next_event = self.coordinator.data.events[0].title if self.coordinator.data.events else None
-        return {"by_category": by_category, "next_event": next_event}
+        options = self.coordinator.config_entry.options
+        area_filter = AreaFilter(
+            mode=options.get(CONF_AREA_MODE, DEFAULT_AREA_MODE),
+            cities=options.get(CONF_CITIES, DEFAULT_CITIES),
+            counties=options.get(CONF_COUNTIES, DEFAULT_COUNTIES),
+            distance_metric=options.get(CONF_DISTANCE_METRIC, DEFAULT_DISTANCE_METRIC),
+            distance_limit=options.get(CONF_DISTANCE_LIMIT, DEFAULT_DISTANCE_LIMIT),
+        )
+        return {
+            "by_category": by_category,
+            "next_event": next_event,
+            "excluded_counts": self.coordinator.data.excluded_counts,
+            "area_summary": area_filter.summary(),
+        }
 
 
 class NextVendorDeadlineSensor(EventScoutEntity, SensorEntity):

@@ -58,6 +58,58 @@ comma-separated, in `organization_ids` when adding an `eventbrite` source.
 The token is a personal OAuth token from your Eventbrite account's API keys
 page.
 
+## Choosing an area
+
+By default Event Scout includes an event when it matches any enabled area
+criterion: a city, a county, or a distance limit from the hub location.
+An option (`area_mode`) switches this to requiring every enabled criterion
+instead. Set the criteria you want in the integration's options and leave
+the rest empty to disable them; leaving all of them empty (or `distance_limit`
+at `0` with no cities or counties) disables the area filter entirely and
+keeps every event within the horizon.
+
+- **Cities** match `ScoutEvent.city` case-insensitively.
+- **Counties** are never guessed from a city name. They are resolved from
+  each event's coordinates through the US Census Bureau geocoder, which is
+  free and keyless but **covers the United States only**; an event outside
+  the US, or without coordinates, cannot be matched by county. Every
+  resolved county is cached, so a given coordinate is geocoded once.
+- **Distance** is measured from the hub's location, in one of three
+  metrics: straight line, estimated driving miles, or estimated driving
+  minutes. Events without coordinates cannot be matched by distance or
+  county; they can still match by city. The `excluded_counts` sensor
+  attribute reports how many events were left out for each reason,
+  including lacking coordinates, so the gap stays visible.
+
+### The estimated distance tier (default)
+
+Driving distance defaults to an estimate that makes no network call: the
+straight-line distance is multiplied by a **road factor** (default `1.3`;
+typical rural Texas values run `1.2` to `1.4`, since actual road distance is
+always somewhat longer than a straight line because roads curve around
+terrain, property lines, and towns instead of connecting two points
+directly). Minutes are derived from that estimated distance and an assumed
+**average speed** (default 45 mph). Every value from this tier is labeled
+`estimated` everywhere it appears: calendar descriptions, sensor
+attributes, digests, and diagnostics. It is never presented as a routed
+fact.
+
+### The routed distance tier (optional)
+
+Setting `osrm_url` switches the driving metrics to actual routed distances
+and times from an [OSRM](https://project-osrm.org) server, using its table
+service so a whole refresh costs a small number of batched requests rather
+than one per event. You can point this at a self-hosted OSRM instance, or
+at the public demo server `https://router.project-osrm.org`.
+
+**The public OSRM demo server carries no service guarantee.** It can be
+slow, rate-limited, or unavailable at any time, and OSRM's own operators do
+not promise otherwise. Event Scout treats any OSRM failure as
+non-fatal: that batch falls back to the estimated tier for that refresh,
+a warning is logged once, and the area filter keeps working. Values from
+the routed tier are labeled `routed` wherever the estimated tier is
+labeled `estimated`.
+
 ## Notifications
 
 Vendor deadline alerts arrive as Companion app actionable notifications with

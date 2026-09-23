@@ -15,6 +15,7 @@ from .const import (
     ATTR_CATEGORIES,
     ATTR_PERIOD,
     ATTR_UID,
+    CONF_COUNTIES,
     CONF_TARGET_CALENDAR,
     CONF_UPDATE_INTERVAL_HOURS,
     DEFAULT_UPDATE_INTERVAL_HOURS,
@@ -74,7 +75,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         categories = call.data.get(ATTR_CATEGORIES)
         events = events_for_period(coordinator.data.events, period=period, categories=categories)
         deadlines = deadlines_for_period(coordinator.data.deadlines, period=period)
-        return digest_response(events, deadlines, period=period)
+        return digest_response(events, deadlines, period=period, group_by_county=bool(entry.options.get(CONF_COUNTIES)))
 
     async def _send_digest(call: ServiceCall) -> None:
         entry = _find_entry(hass, call)
@@ -86,7 +87,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         categories = call.data.get(ATTR_CATEGORIES)
         events = events_for_period(coordinator.data.events, period=period, categories=categories)
         deadlines = deadlines_for_period(coordinator.data.deadlines, period=period)
-        response = digest_response(events, deadlines, period=period)
+        response = digest_response(events, deadlines, period=period, group_by_county=bool(entry.options.get(CONF_COUNTIES)))
         await hass.services.async_call(
             "notify",
             notify_service,

@@ -70,3 +70,72 @@ manages independently.
 them. This keeps the integration's own network footprint small, predictable,
 and easy to explain in `SECURITY.md`, at the cost of missing vendor pages at
 paths outside that fixed list; `docs/sources.md` documents the limitation.
+
+## Why the US Census geocoder for county resolution
+
+`docs/design-area-filter.md` section 1 requires that county never be
+guessed from a city name. The US Census Bureau's geocoder
+(`geocoding.geo.census.gov`) resolves coordinates to their containing
+county, is free, requires no API key, and is authoritative for US
+addresses because it is the source the Census Bureau itself uses for
+geography assignment. Its coverage is United States only, which is an
+acceptable limit for a household in Texas and is called out in the README.
+Every resolved coordinate is cached forever in the Store (`county_cache`,
+rounded to three decimal places, about 100 meters), so a given event is
+geocoded once across its lifetime, not once per refresh.
+
+## Why OSRM's table service for routed distance
+
+The routed distance tier (`geo.py: OSRMClient`) uses OSRM's `/table`
+endpoint rather than repeated `/route` calls. The table service accepts one
+origin and many destinations in a single request and returns a full
+distance and duration matrix, so a refresh with a few hundred candidate
+events costs one HTTP request per batch of 50 destinations instead of one
+request per event. OSRM is also the only router with a public,
+no-registration demo server (`router.project-osrm.org`), which keeps the
+routed tier usable without asking Sean to run infrastructure before trying
+it, provided the demo's lack of an availability guarantee is documented
+(README, `docs/unverified.md`) and every routed failure falls back to the
+estimate tier rather than failing the refresh.
+
+## Why the estimate tier is the default
+
+`distance_metric` defaults to `straight_line`, and even the driving metrics
+never call OSRM unless `osrm_url` is explicitly set. A straight-line
+distance, or a road-factor estimate of it, requires no network call at all,
+so the area filter always works, even with no OSRM server configured and
+even when a self-hosted one is temporarily down. Making a routed lookup the
+default would mean the area filter's behavior for every user without an
+OSRM server depends on the public demo's availability, which
+`docs/design-area-filter.md` explicitly says carries no service guarantee.
+Every estimated figure is labeled `estimated` (calendar descriptions,
+sensor attributes, diagnostics) so the estimate is never presented as a
+measured fact.
+
+## Legacy radius_miles seeding excludes coordinate-less events by default
+
+Because `distance_limit` seeds itself from the existing `radius_miles` hub
+data key (default 50) when no area options have been set, an upgraded hub
+has the distance criterion enabled out of the box. Per
+`docs/design-area-filter.md` section 1, an event with no coordinates cannot
+be distance- or county-filtered, so with only the seeded distance criterion
+enabled and no cities configured, such an event (for example, a `manual`
+source city birthday, which never carries coordinates) is excluded rather
+than passed through unfiltered as it was before this feature. This is a
+real behavior change on upgrade, not an incidental side effect: anyone
+relying on coordinate-less sources should add at least one city to
+`cities`, or set `distance_limit` to `0`, to keep those events included.
+The README's "Choosing an area" section and this note are how that trade-off
+is surfaced; there is no way to make "match nothing extra by default" and
+"seed the existing radius as a working distance filter" both true at once.
+
+## Why no paid routing API
+
+A paid routing API (Google Distance Matrix, Mapbox, HERE) would give exact
+driving distances without asking Sean to run OSRM himself, but it would
+also mean the area filter, a feature meant to run unattended on a schedule,
+depends on a billed, keyed, rate-limited third-party service by default.
+That contradicts `docs/design.md`'s own non-goal list, which already
+excludes paid APIs wherever a free path exists, and the two free tiers
+(no-network estimate, self-hosted or demo OSRM) cover the stated
+requirement well enough for a single household's use.

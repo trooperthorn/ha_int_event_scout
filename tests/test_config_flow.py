@@ -48,6 +48,39 @@ async def test_options_flow_updates_options(hass) -> None:  # noqa: ANN001
     assert entry.options["notify_service"] == "mobile_app_phone"
 
 
+async def test_options_flow_accepts_area_filter_fields(hass) -> None:  # noqa: ANN001
+    entry = MockConfigEntry(domain=DOMAIN, unique_id="area event scout", data={"name": "Area Event Scout"})
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.event_scout.coordinator.EventScoutCoordinator._async_update_data",
+        AsyncMock(return_value=_empty_scout_data()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result2 = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {
+            "area_mode": "all",
+            "cities": ["Georgetown", "Round Rock"],
+            "counties": ["Williamson"],
+            "distance_metric": "driving_minutes",
+            "distance_limit": 45,
+            "road_factor": 1.25,
+            "average_speed_mph": 40,
+            "osrm_url": "https://router.project-osrm.org",
+        },
+    )
+    assert result2["type"] == "create_entry"
+    assert entry.options["area_mode"] == "all"
+    assert entry.options["cities"] == ["Georgetown", "Round Rock"]
+    assert entry.options["counties"] == ["Williamson"]
+    assert entry.options["distance_metric"] == "driving_minutes"
+    assert entry.options["distance_limit"] == 45
+
+
 async def test_source_subentry_flow_manual(hass) -> None:  # noqa: ANN001
     entry = MockConfigEntry(domain=DOMAIN, unique_id="my event scout", data={"name": "My Event Scout"})
     entry.add_to_hass(hass)

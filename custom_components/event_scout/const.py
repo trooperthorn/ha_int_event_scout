@@ -21,6 +21,55 @@ CONF_CATEGORIES: Final = "categories"
 CONF_TARGET_CALENDAR: Final = "target_calendar"
 CONF_SOURCE_KIND: Final = "source_kind"
 
+CONF_AREA_MODE: Final = "area_mode"
+CONF_CITIES: Final = "cities"
+CONF_COUNTIES: Final = "counties"
+CONF_DISTANCE_METRIC: Final = "distance_metric"
+CONF_DISTANCE_LIMIT: Final = "distance_limit"
+CONF_ROAD_FACTOR: Final = "road_factor"
+CONF_AVERAGE_SPEED_MPH: Final = "average_speed_mph"
+CONF_OSRM_URL: Final = "osrm_url"
+
+AREA_MODE_ANY: Final = "any"
+AREA_MODE_ALL: Final = "all"
+AREA_MODES: Final = [AREA_MODE_ANY, AREA_MODE_ALL]
+
+DISTANCE_METRIC_STRAIGHT_LINE: Final = "straight_line"
+DISTANCE_METRIC_DRIVING_MILES: Final = "driving_miles"
+DISTANCE_METRIC_DRIVING_MINUTES: Final = "driving_minutes"
+DISTANCE_METRICS: Final = [
+    DISTANCE_METRIC_STRAIGHT_LINE,
+    DISTANCE_METRIC_DRIVING_MILES,
+    DISTANCE_METRIC_DRIVING_MINUTES,
+]
+
+DISTANCE_ORIGIN_STRAIGHT: Final = "straight"
+DISTANCE_ORIGIN_ESTIMATED: Final = "estimated"
+DISTANCE_ORIGIN_ROUTED: Final = "routed"
+
+EXCLUDED_REASON_OUTSIDE_AREA: Final = "outside_area"
+EXCLUDED_REASON_NO_COORDINATES: Final = "no_coordinates"
+EXCLUDED_REASON_COUNTY_UNRESOLVED: Final = "county_unresolved"
+
+DEFAULT_AREA_MODE: Final = AREA_MODE_ANY
+DEFAULT_CITIES: Final[list[str]] = []
+DEFAULT_COUNTIES: Final[list[str]] = []
+DEFAULT_DISTANCE_METRIC: Final = DISTANCE_METRIC_STRAIGHT_LINE
+DEFAULT_DISTANCE_LIMIT: Final = 50
+DEFAULT_ROAD_FACTOR: Final = 1.3
+DEFAULT_AVERAGE_SPEED_MPH: Final = 45
+DEFAULT_OSRM_URL: Final = ""
+
+CENSUS_GEOCODER_URL: Final = (
+    "https://geocoding.geo.census.gov/geocoder/geographies/coordinates"
+    "?x={lon}&y={lat}&benchmark=Public_AR_Current&vintage=Current_Current&format=json"
+)
+CENSUS_REQUEST_SPACING_SECONDS: Final = 0.5
+
+OSRM_TABLE_PATH: Final = "/table/v1/driving/{coords}?sources=0&annotations=distance,duration"
+OSRM_MAX_DESTINATIONS_PER_REQUEST: Final = 50
+ROUTE_CACHE_MAX_AGE_DAYS: Final = 30
+
 DEFAULT_RADIUS_MILES: Final = 50
 DEFAULT_HORIZON_DAYS: Final = 90
 DEFAULT_UPDATE_INTERVAL_HOURS: Final = 6

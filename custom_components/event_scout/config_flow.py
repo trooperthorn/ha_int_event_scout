@@ -14,25 +14,44 @@ from homeassistant.config_entries import (
     SubentryFlowResult,
 )
 from homeassistant.core import callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
+    AREA_MODES,
     CATEGORIES,
+    CONF_AREA_MODE,
+    CONF_AVERAGE_SPEED_MPH,
     CONF_CATEGORIES,
+    CONF_CITIES,
+    CONF_COUNTIES,
     CONF_DIGEST_TIME,
+    CONF_DISTANCE_LIMIT,
+    CONF_DISTANCE_METRIC,
     CONF_HORIZON_DAYS,
     CONF_NOTIFY_SERVICE,
+    CONF_OSRM_URL,
     CONF_RADIUS_MILES,
     CONF_RECONNAISSANCE_DAYS,
+    CONF_ROAD_FACTOR,
     CONF_TARGET_CALENDAR,
     CONF_UPDATE_INTERVAL_HOURS,
     CONF_VENDOR_LEAD_DAYS,
+    DEFAULT_AREA_MODE,
+    DEFAULT_AVERAGE_SPEED_MPH,
+    DEFAULT_CITIES,
+    DEFAULT_COUNTIES,
     DEFAULT_DIGEST_TIME,
+    DEFAULT_DISTANCE_LIMIT,
+    DEFAULT_DISTANCE_METRIC,
     DEFAULT_HORIZON_DAYS,
+    DEFAULT_OSRM_URL,
     DEFAULT_RADIUS_MILES,
     DEFAULT_RECONNAISSANCE_DAYS,
+    DEFAULT_ROAD_FACTOR,
     DEFAULT_UPDATE_INTERVAL_HOURS,
     DEFAULT_VENDOR_LEAD_DAYS,
+    DISTANCE_METRICS,
     DOMAIN,
     MIN_UPDATE_INTERVAL_HOURS,
     SOURCE_KIND_EVENTBRITE,
@@ -67,6 +86,26 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Optional(CONF_DIGEST_TIME, default=DEFAULT_DIGEST_TIME): str,
         vol.Optional(CONF_CATEGORIES, default=CATEGORIES): [vol.In(CATEGORIES)],
         vol.Optional(CONF_TARGET_CALENDAR, default=""): str,
+        vol.Optional(CONF_AREA_MODE, default=DEFAULT_AREA_MODE): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=AREA_MODES, translation_key=CONF_AREA_MODE)
+        ),
+        vol.Optional(CONF_CITIES, default=DEFAULT_CITIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+        vol.Optional(CONF_COUNTIES, default=DEFAULT_COUNTIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+        vol.Optional(CONF_DISTANCE_METRIC, default=DEFAULT_DISTANCE_METRIC): selector.SelectSelector(
+            selector.SelectSelectorConfig(options=DISTANCE_METRICS, translation_key=CONF_DISTANCE_METRIC)
+        ),
+        vol.Optional(CONF_DISTANCE_LIMIT, default=DEFAULT_DISTANCE_LIMIT): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=500, step=1, mode=selector.NumberSelectorMode.BOX)
+        ),
+        vol.Optional(CONF_ROAD_FACTOR, default=DEFAULT_ROAD_FACTOR): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1.0, max=2.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
+        ),
+        vol.Optional(CONF_AVERAGE_SPEED_MPH, default=DEFAULT_AVERAGE_SPEED_MPH): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1, max=100, step=1, mode=selector.NumberSelectorMode.BOX)
+        ),
+        vol.Optional(CONF_OSRM_URL, default=DEFAULT_OSRM_URL): selector.TextSelector(
+            selector.TextSelectorConfig(type=selector.TextSelectorType.URL)
+        ),
     }
 )
 

@@ -50,3 +50,25 @@ Specifically not exercised against the real network:
 - GitHub branch protection and the release GitHub App installation on this
   repository; both are explicitly left pending per the standing instruction
   that repository settings changes are reported, not applied unasked.
+
+## Area filter (docs/design-area-filter.md), added 2026-09-22
+
+- The Census geocoder response key path used by `county.py:
+  county_name_from_response` (`result.geographies["Counties"][0]["NAME"]`)
+  is taken from the design document and Census documentation, not confirmed
+  against a live response. `tests/fixtures/census_geocoder_response.json`
+  is constructed from documentation in that shape, not recorded from a real
+  call; the path must be confirmed against a live response before this is
+  treated as settled.
+- Whether the public OSRM demo server (`https://router.project-osrm.org`)
+  is available at any given time is not something this build can verify or
+  guarantee; it carries no service guarantee per its own operators, which
+  is why the estimate tier is the default and every routed failure falls
+  back to it. `tests/fixtures/osrm_table_response.json` is constructed from
+  the OSRM `/table` service documentation, not recorded from a real call.
+- Real Census geocoder responses for coordinates outside the continental
+  United States (the service is documented as US-only; behavior outside
+  that area, including Alaska, Hawaii, and US territories, is not tested).
+- The Census geocoder's actual rate limit; it publishes no numeric limit,
+  so `county.py` serializes requests with a fixed 0.5 s spacing as a
+  conservative default rather than a confirmed safe rate.

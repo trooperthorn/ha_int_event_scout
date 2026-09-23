@@ -92,6 +92,10 @@ class ScoutEvent:
     latitude: float | None = None
     longitude: float | None = None
     distance_miles: float | None = None
+    county: str | None = None
+    drive_miles: float | None = None
+    drive_minutes: float | None = None
+    distance_origin: Literal["straight", "estimated", "routed"] | None = None
     category: EventCategory = "other"
     is_free: bool | None = None
     cost_text: str | None = None
@@ -142,3 +146,4 @@ class ScoutData:
     events: list[ScoutEvent] = field(default_factory=list)
     deadlines: list[DeadlineAlert] = field(default_factory=list)
     source_status: dict[str, SourceStatus] = field(default_factory=dict)
+    excluded_counts: dict[str, int] = field(default_factory=dict)
