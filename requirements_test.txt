@@ -2,5 +2,5 @@ homeassistant==2026.9.3
 pytest-homeassistant-custom-component==0.13.366
 pytest-cov==7.1.0
 ical>=14.2.0,<15
-ruff==0.14.4
+ruff==0.16.8
 mypy==2.3.1
