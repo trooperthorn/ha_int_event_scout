@@ -7,6 +7,7 @@ from datetime import datetime
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from . import EventScoutConfigEntry
 from .entity import EventScoutEntity
@@ -37,7 +38,7 @@ class EventsCalendar(EventScoutEntity, CalendarEntity):
     @property
     def event(self) -> CalendarEvent | None:
         """Return the next upcoming (or currently active) event."""
-        today = datetime.now().date()
+        today = dt_util.now().date()
         for scout_event in self.coordinator.data.events:
             end = scout_event.end or scout_event.start
             end_date = end.date() if isinstance(end, datetime) else end
@@ -69,7 +70,7 @@ class VendorDeadlinesCalendar(EventScoutEntity, CalendarEntity):
     @property
     def event(self) -> CalendarEvent | None:
         """Return the next upcoming deadline alert."""
-        today = datetime.now().date()
+        today = dt_util.now().date()
         upcoming = sorted((a for a in self.coordinator.data.deadlines if a.when >= today), key=lambda a: a.when)
         if not upcoming:
             return None

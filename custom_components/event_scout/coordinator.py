@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
@@ -145,7 +145,7 @@ class EventScoutCoordinator(DataUpdateCoordinator[ScoutData]):
         if entry.subentries and not any_success:
             raise UpdateFailed("Every configured source failed")
 
-        today = date.today()
+        today = dt_util.now().date()
         horizon_end = today + timedelta(days=horizon_days)
         within_horizon = [e for e in raw_events if today <= e.start_date <= horizon_end]
 
@@ -312,7 +312,7 @@ class EventScoutCoordinator(DataUpdateCoordinator[ScoutData]):
 
     def _compute_alerts(self, events: list[ScoutEvent], *, lead_days: list[int], reconnaissance_days: int) -> list[DeadlineAlert]:
         alerts: list[DeadlineAlert] = []
-        today = date.today()
+        today = dt_util.now().date()
 
         for event in events:
             vendor = event.vendor

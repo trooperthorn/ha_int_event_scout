@@ -1,5 +1,18 @@
 # Design decisions
 
+## 2026-10-08: Minimum Home Assistant is 2026.10.0, schemas use probatio
+
+Core 2026.10 types flow, service and websocket schemas as probatio, so the
+voluptuous schemas failed mypy (developer blog 2026-09-30, "Probatio is our
+validation engine"). The integration now imports `probatio` directly, as core
+does; runtime behavior is unchanged because core has validated with probatio
+since 2026.9. The suite runs on core 2026.10.0 and `hacs.json` follows the
+tested core. "Today" now comes from `dt_util.now()` (Home Assistant's
+configured time zone) instead of `date.today()`/`datetime.now()` (the host's,
+usually UTC in a container), and the test suite pins today to 2026-09-20 so the
+fixed fixture dates stay inside the horizon. Rejected: aliasing `probatio as
+vol`, which core's lint config bans.
+
 ## Why the dead or paywalled sources are excluded
 
 Per `docs/research.md` section 1 and 2:

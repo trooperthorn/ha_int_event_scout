@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import voluptuous as vol
+import probatio
 from homeassistant import config_entries
 from homeassistant.config_entries import (
     ConfigEntry,
@@ -65,114 +65,114 @@ from .const import (
 )
 from .sources import SourceContext, SourceValidationError, get_source
 
-HUB_SCHEMA = vol.Schema(
+HUB_SCHEMA = probatio.Schema(
     {
-        vol.Required("name", default="Event Scout"): str,
-        vol.Optional("latitude"): vol.Coerce(float),
-        vol.Optional("longitude"): vol.Coerce(float),
-        vol.Optional(CONF_RADIUS_MILES, default=DEFAULT_RADIUS_MILES): vol.Coerce(int),
-        vol.Optional(CONF_HORIZON_DAYS, default=DEFAULT_HORIZON_DAYS): vol.Coerce(int),
-        vol.Optional(CONF_UPDATE_INTERVAL_HOURS, default=DEFAULT_UPDATE_INTERVAL_HOURS): vol.All(
-            vol.Coerce(int), vol.Range(min=MIN_UPDATE_INTERVAL_HOURS)
+        probatio.Required("name", default="Event Scout"): str,
+        probatio.Optional("latitude"): probatio.Coerce(float),
+        probatio.Optional("longitude"): probatio.Coerce(float),
+        probatio.Optional(CONF_RADIUS_MILES, default=DEFAULT_RADIUS_MILES): probatio.Coerce(int),
+        probatio.Optional(CONF_HORIZON_DAYS, default=DEFAULT_HORIZON_DAYS): probatio.Coerce(int),
+        probatio.Optional(CONF_UPDATE_INTERVAL_HOURS, default=DEFAULT_UPDATE_INTERVAL_HOURS): probatio.All(
+            probatio.Coerce(int), probatio.Range(min=MIN_UPDATE_INTERVAL_HOURS)
         ),
     }
 )
 
-OPTIONS_SCHEMA = vol.Schema(
+OPTIONS_SCHEMA = probatio.Schema(
     {
-        vol.Optional(CONF_NOTIFY_SERVICE, default=""): str,
-        vol.Optional(CONF_VENDOR_LEAD_DAYS, default=DEFAULT_VENDOR_LEAD_DAYS): [vol.Coerce(int)],
-        vol.Optional(CONF_RECONNAISSANCE_DAYS, default=DEFAULT_RECONNAISSANCE_DAYS): vol.Coerce(int),
-        vol.Optional(CONF_DIGEST_TIME, default=DEFAULT_DIGEST_TIME): str,
-        vol.Optional(CONF_CATEGORIES, default=CATEGORIES): [vol.In(CATEGORIES)],
-        vol.Optional(CONF_TARGET_CALENDAR, default=""): str,
-        vol.Optional(CONF_AREA_MODE, default=DEFAULT_AREA_MODE): selector.SelectSelector(
+        probatio.Optional(CONF_NOTIFY_SERVICE, default=""): str,
+        probatio.Optional(CONF_VENDOR_LEAD_DAYS, default=DEFAULT_VENDOR_LEAD_DAYS): [probatio.Coerce(int)],
+        probatio.Optional(CONF_RECONNAISSANCE_DAYS, default=DEFAULT_RECONNAISSANCE_DAYS): probatio.Coerce(int),
+        probatio.Optional(CONF_DIGEST_TIME, default=DEFAULT_DIGEST_TIME): str,
+        probatio.Optional(CONF_CATEGORIES, default=CATEGORIES): [probatio.In(CATEGORIES)],
+        probatio.Optional(CONF_TARGET_CALENDAR, default=""): str,
+        probatio.Optional(CONF_AREA_MODE, default=DEFAULT_AREA_MODE): selector.SelectSelector(
             selector.SelectSelectorConfig(options=AREA_MODES, translation_key=CONF_AREA_MODE)
         ),
-        vol.Optional(CONF_CITIES, default=DEFAULT_CITIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
-        vol.Optional(CONF_COUNTIES, default=DEFAULT_COUNTIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
-        vol.Optional(CONF_DISTANCE_METRIC, default=DEFAULT_DISTANCE_METRIC): selector.SelectSelector(
+        probatio.Optional(CONF_CITIES, default=DEFAULT_CITIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+        probatio.Optional(CONF_COUNTIES, default=DEFAULT_COUNTIES): selector.TextSelector(selector.TextSelectorConfig(multiple=True)),
+        probatio.Optional(CONF_DISTANCE_METRIC, default=DEFAULT_DISTANCE_METRIC): selector.SelectSelector(
             selector.SelectSelectorConfig(options=DISTANCE_METRICS, translation_key=CONF_DISTANCE_METRIC)
         ),
-        vol.Optional(CONF_DISTANCE_LIMIT, default=DEFAULT_DISTANCE_LIMIT): selector.NumberSelector(
+        probatio.Optional(CONF_DISTANCE_LIMIT, default=DEFAULT_DISTANCE_LIMIT): selector.NumberSelector(
             selector.NumberSelectorConfig(min=0, max=500, step=1, mode=selector.NumberSelectorMode.BOX)
         ),
-        vol.Optional(CONF_ROAD_FACTOR, default=DEFAULT_ROAD_FACTOR): selector.NumberSelector(
+        probatio.Optional(CONF_ROAD_FACTOR, default=DEFAULT_ROAD_FACTOR): selector.NumberSelector(
             selector.NumberSelectorConfig(min=1.0, max=2.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
         ),
-        vol.Optional(CONF_AVERAGE_SPEED_MPH, default=DEFAULT_AVERAGE_SPEED_MPH): selector.NumberSelector(
+        probatio.Optional(CONF_AVERAGE_SPEED_MPH, default=DEFAULT_AVERAGE_SPEED_MPH): selector.NumberSelector(
             selector.NumberSelectorConfig(min=1, max=100, step=1, mode=selector.NumberSelectorMode.BOX)
         ),
-        vol.Optional(CONF_OSRM_URL, default=DEFAULT_OSRM_URL): selector.TextSelector(
+        probatio.Optional(CONF_OSRM_URL, default=DEFAULT_OSRM_URL): selector.TextSelector(
             selector.TextSelectorConfig(type=selector.TextSelectorType.URL)
         ),
     }
 )
 
-_SOURCE_KIND_SCHEMA = vol.Schema({vol.Required("source_kind"): vol.In(SOURCE_KINDS)})
+_SOURCE_KIND_SCHEMA = probatio.Schema({probatio.Required("source_kind"): probatio.In(SOURCE_KINDS)})
 
-_SOURCE_ARG_SCHEMAS: dict[str, vol.Schema] = {
-    SOURCE_KIND_ICS: vol.Schema(
+_SOURCE_ARG_SCHEMAS: dict[str, probatio.Schema] = {
+    SOURCE_KIND_ICS: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("url"): str,
-            vol.Required("category", default="other"): vol.In(CATEGORIES),
-            vol.Optional("username"): str,
-            vol.Optional("password"): str,
+            probatio.Required("name"): str,
+            probatio.Required("url"): str,
+            probatio.Required("category", default="other"): probatio.In(CATEGORIES),
+            probatio.Optional("username"): str,
+            probatio.Optional("password"): str,
         }
     ),
-    SOURCE_KIND_JSONLD: vol.Schema(
+    SOURCE_KIND_JSONLD: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("url"): str,
-            vol.Required("category", default="other"): vol.In(CATEGORIES),
-            vol.Optional("vendor_probe", default=False): bool,
+            probatio.Required("name"): str,
+            probatio.Required("url"): str,
+            probatio.Required("category", default="other"): probatio.In(CATEGORIES),
+            probatio.Optional("vendor_probe", default=False): bool,
         }
     ),
-    SOURCE_KIND_TICKETMASTER: vol.Schema(
+    SOURCE_KIND_TICKETMASTER: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("api_key"): str,
-            vol.Optional("segments", default=[]): [str],
-            vol.Optional("keyword"): str,
+            probatio.Required("name"): str,
+            probatio.Required("api_key"): str,
+            probatio.Optional("segments", default=[]): [str],
+            probatio.Optional("keyword"): str,
         }
     ),
-    SOURCE_KIND_SOCRATA: vol.Schema(
+    SOURCE_KIND_SOCRATA: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("domain"): str,
-            vol.Required("dataset_id"): str,
-            vol.Required("category", default="other"): vol.In(CATEGORIES),
-            vol.Optional("field_title", default="title"): str,
-            vol.Optional("field_start", default="start_date"): str,
-            vol.Optional("field_end"): str,
-            vol.Optional("field_url"): str,
-            vol.Optional("field_venue"): str,
-            vol.Optional("app_token"): str,
+            probatio.Required("name"): str,
+            probatio.Required("domain"): str,
+            probatio.Required("dataset_id"): str,
+            probatio.Required("category", default="other"): probatio.In(CATEGORIES),
+            probatio.Optional("field_title", default="title"): str,
+            probatio.Optional("field_start", default="start_date"): str,
+            probatio.Optional("field_end"): str,
+            probatio.Optional("field_url"): str,
+            probatio.Optional("field_venue"): str,
+            probatio.Optional("app_token"): str,
         }
     ),
-    SOURCE_KIND_MANUAL: vol.Schema(
+    SOURCE_KIND_MANUAL: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("title"): str,
-            vol.Required("category", default="other"): vol.In(CATEGORIES),
-            vol.Required("month"): vol.All(vol.Coerce(int), vol.Range(min=1, max=12)),
-            vol.Optional("day"): vol.All(vol.Coerce(int), vol.Range(min=1, max=31)),
-            vol.Optional("weekday"): vol.All(vol.Coerce(int), vol.Range(min=0, max=6)),
-            vol.Optional("nth"): vol.All(vol.Coerce(int), vol.Range(min=-1, max=5)),
-            vol.Optional("city"): str,
-            vol.Optional("vendor_open"): str,
-            vol.Optional("vendor_deadline"): str,
-            vol.Optional("vendor_url"): str,
+            probatio.Required("name"): str,
+            probatio.Required("title"): str,
+            probatio.Required("category", default="other"): probatio.In(CATEGORIES),
+            probatio.Required("month"): probatio.All(probatio.Coerce(int), probatio.Range(min=1, max=12)),
+            probatio.Optional("day"): probatio.All(probatio.Coerce(int), probatio.Range(min=1, max=31)),
+            probatio.Optional("weekday"): probatio.All(probatio.Coerce(int), probatio.Range(min=0, max=6)),
+            probatio.Optional("nth"): probatio.All(probatio.Coerce(int), probatio.Range(min=-1, max=5)),
+            probatio.Optional("city"): str,
+            probatio.Optional("vendor_open"): str,
+            probatio.Optional("vendor_deadline"): str,
+            probatio.Optional("vendor_url"): str,
         }
     ),
-    SOURCE_KIND_EVENTBRITE: vol.Schema(
+    SOURCE_KIND_EVENTBRITE: probatio.Schema(
         {
-            vol.Required("name"): str,
-            vol.Required("token"): str,
-            vol.Required("organization_ids"): str,
-            vol.Optional("venue_ids"): str,
-            vol.Required("category", default="other"): vol.In(CATEGORIES),
+            probatio.Required("name"): str,
+            probatio.Required("token"): str,
+            probatio.Required("organization_ids"): str,
+            probatio.Optional("venue_ids"): str,
+            probatio.Required("category", default="other"): probatio.In(CATEGORIES),
         }
     ),
 }

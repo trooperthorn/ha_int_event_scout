@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any
 
-import voluptuous as vol
+import probatio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.exceptions import ServiceValidationError
@@ -38,22 +38,22 @@ from .models import VendorInfo
 
 type EventScoutConfigEntry = ConfigEntry[EventScoutCoordinator]
 
-_DIGEST_SCHEMA = vol.Schema(
+_DIGEST_SCHEMA = probatio.Schema(
     {
-        vol.Required(ATTR_PERIOD): vol.In([DIGEST_PERIOD_DAILY, DIGEST_PERIOD_WEEKLY]),
-        vol.Optional(ATTR_CATEGORIES): [str],
+        probatio.Required(ATTR_PERIOD): probatio.In([DIGEST_PERIOD_DAILY, DIGEST_PERIOD_WEEKLY]),
+        probatio.Optional(ATTR_CATEGORIES): [str],
     }
 )
 
-_SET_VENDOR_INFO_SCHEMA = vol.Schema(
+_SET_VENDOR_INFO_SCHEMA = probatio.Schema(
     {
-        vol.Required(ATTR_UID): str,
-        vol.Optional("available"): vol.In(["yes", "no", "unknown"]),
-        vol.Optional("app_open"): cv.date,
-        vol.Optional("app_deadline"): cv.date,
-        vol.Optional("app_url"): str,
-        vol.Optional("booth_fee_text"): str,
-        vol.Optional("jury_fee_text"): str,
+        probatio.Required(ATTR_UID): str,
+        probatio.Optional("available"): probatio.In(["yes", "no", "unknown"]),
+        probatio.Optional("app_open"): cv.date,
+        probatio.Optional("app_deadline"): cv.date,
+        probatio.Optional("app_url"): str,
+        probatio.Optional("booth_fee_text"): str,
+        probatio.Optional("jury_fee_text"): str,
     }
 )
 
@@ -132,9 +132,9 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_GET_DIGEST, _get_digest, schema=_DIGEST_SCHEMA, supports_response=SupportsResponse.ONLY)
     hass.services.async_register(DOMAIN, SERVICE_SEND_DIGEST, _send_digest, schema=_DIGEST_SCHEMA)
-    hass.services.async_register(DOMAIN, SERVICE_SEND_ALERTS, _send_alerts, schema=vol.Schema({}))
+    hass.services.async_register(DOMAIN, SERVICE_SEND_ALERTS, _send_alerts, schema=probatio.Schema({}))
     hass.services.async_register(DOMAIN, SERVICE_SET_VENDOR_INFO, _set_vendor_info, schema=_SET_VENDOR_INFO_SCHEMA)
-    hass.services.async_register(DOMAIN, SERVICE_REFRESH, _refresh, schema=vol.Schema({}))
+    hass.services.async_register(DOMAIN, SERVICE_REFRESH, _refresh, schema=probatio.Schema({}))
 
     return True
 
