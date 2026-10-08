@@ -150,7 +150,7 @@ async def probe_vendor_pages(session: aiohttp.ClientSession, event_url: str, *, 
                 if resp.status != 200:
                     continue
                 html = await resp.text()
-        except (TimeoutError, aiohttp.ClientError):
+        except TimeoutError, aiohttp.ClientError:
             continue
         text = extract_visible_text(html)
         found = _extract_deadline_and_fee(text)
@@ -175,7 +175,7 @@ async def _fetch_robots_disallow(session: aiohttp.ClientSession, base: str, *, t
             if resp.status != 200:
                 return disallowed
             body = await resp.text()
-    except (TimeoutError, aiohttp.ClientError):
+    except TimeoutError, aiohttp.ClientError:
         return disallowed
 
     applies = False

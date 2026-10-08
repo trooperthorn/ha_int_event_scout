@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 
 import aiohttp
+from homeassistant.util import dt as dt_util
 from ical.calendar_stream import IcsCalendarStream
 from ical.exceptions import CalendarParseError
 
@@ -50,7 +51,7 @@ class IcsSource(Source):
         except CalendarParseError as err:
             raise SourceValidationError(f"Invalid ICS content: {err}") from err
 
-        horizon_start = date.today()
+        horizon_start = dt_util.now().date()
         horizon_end = horizon_start + timedelta(days=ctx.horizon_days)
         events: list[ScoutEvent] = []
         for vevent in calendar.timeline.overlapping(

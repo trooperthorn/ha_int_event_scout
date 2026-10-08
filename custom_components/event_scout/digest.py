@@ -5,13 +5,15 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any
 
+from homeassistant.util import dt as dt_util
+
 from .const import DIGEST_PERIOD_DAILY, EVENT_SCOUT_ADD_CAL, EVENT_SCOUT_DISMISS
 from .models import DeadlineAlert, ScoutEvent
 
 
 def events_for_period(events: list[ScoutEvent], *, period: str, categories: list[str] | None, today: date | None = None) -> list[ScoutEvent]:
     """Return events falling within a digest period, optionally filtered by category."""
-    today = today or date.today()
+    today = today or dt_util.now().date()
     end = today + timedelta(days=1 if period == DIGEST_PERIOD_DAILY else 7)
     selected = [e for e in events if today <= e.start_date < end]
     if categories:
@@ -21,7 +23,7 @@ def events_for_period(events: list[ScoutEvent], *, period: str, categories: list
 
 def deadlines_for_period(deadlines: list[DeadlineAlert], *, period: str, today: date | None = None) -> list[DeadlineAlert]:
     """Return deadline alerts falling within a digest period."""
-    today = today or date.today()
+    today = today or dt_util.now().date()
     end = today + timedelta(days=1 if period == DIGEST_PERIOD_DAILY else 7)
     selected = [d for d in deadlines if today <= d.when < end]
     return sorted(selected, key=lambda d: d.when)
