@@ -13,15 +13,18 @@ usually UTC in a container), and the test suite pins today to 2026-09-20 so the
 fixed fixture dates stay inside the horizon. Rejected: aliasing `probatio as
 vol`, which core's lint config bans.
 
-## 2026-11-23: cryptography range follows core 2026.10
+## 2026-11-23: pyjwt and cryptography come from core, not the manifest
 
 Core 2026.10 pins `cryptography==50.0.1` and `PyJWT==2.15.1`
-(`package_constraints.txt`). The optional-sources branch was written against
-core 2026.9 and declared `cryptography>=48.0.1,<49`, which cannot be installed
-next to core 2026.10, so the range in `manifest.json` and
-`requirements_test.txt` is now `>=48.0.1,<51`. `pyjwt>=2.13.0,<3` and
-`aioimaplib>=2.0.1,<3` already admit core's pins and are unchanged. These stay
-ranges, never exact pins (`docs/design-optional-sources.md`).
+(`package_constraints.txt`), and hassfest rejects a custom integration whose
+manifest lists a requirement that is a dependency of Home Assistant itself.
+The optional-sources branch was written against core 2026.9 and declared
+`pyjwt>=2.13.0,<3` and `cryptography>=48.0.1,<49` in `manifest.json`; both are
+removed there, so the Meetup source uses whatever core ships. This supersedes
+the "declare ranges" note in `docs/design-optional-sources.md`. `aioimaplib` is
+not a core dependency and stays in the manifest. `requirements_test.txt` keeps
+all three as ranges, with cryptography widened to `<51` so it installs next to
+core 2026.10.
 
 ## Why the dead or paywalled sources are excluded
 
