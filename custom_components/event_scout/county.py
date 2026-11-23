@@ -20,7 +20,7 @@ def county_name_from_response(payload: dict[str, Any]) -> str | None:
     """
     try:
         counties = payload["result"]["geographies"]["Counties"]
-    except (KeyError, TypeError):
+    except KeyError, TypeError:
         return None
     if not counties:
         return None

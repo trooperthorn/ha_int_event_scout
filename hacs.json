@@ -1,6 +1,6 @@
 {
   "name": "Event Scout",
   "render_readme": true,
-  "homeassistant": "2026.9.2",
+  "homeassistant": "2026.10.0",
   "zip_release": false
 }

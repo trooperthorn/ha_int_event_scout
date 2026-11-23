@@ -63,7 +63,7 @@ def _decode_payload(part: Message) -> str:
             return str(part.get_payload())
         charset = part.get_content_charset() or "utf-8"
         return raw.decode(charset, errors="replace")
-    except (LookupError, ValueError):
+    except LookupError, ValueError:
         return str(part.get_payload())
 
 

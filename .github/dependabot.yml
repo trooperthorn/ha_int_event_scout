@@ -5,8 +5,19 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      # init and analyze must move together; split bumps fail CodeQL.
+      codeql:
+        patterns:
+          - "github/codeql-action*"
   - package-ecosystem: pip
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      # The harness pins core exactly; homeassistant and the harness must move together.
+      home-assistant:
+        patterns:
+          - "homeassistant"
+          - "pytest-homeassistant-custom-component"

@@ -11,6 +11,7 @@ import calendar as calendar_mod
 from datetime import date, timedelta
 
 import aiohttp
+from homeassistant.util import dt as dt_util
 
 from ..const import SOURCE_KIND_MANUAL, VENDOR_ORIGIN_MANUAL
 from ..models import ScoutEvent, VendorInfo
@@ -61,7 +62,7 @@ class ManualSource(Source):
 
     async def async_fetch(self, session: aiohttp.ClientSession, ctx: SourceContext) -> list[ScoutEvent]:
         """Compute the next occurrence of this recurring event."""
-        today = date.today()
+        today = dt_util.now().date()
         horizon_end = today + timedelta(days=ctx.horizon_days)
         month = int(self.data["month"])
 

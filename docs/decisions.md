@@ -1,5 +1,28 @@
 # Design decisions
 
+## 2026-10-08: Minimum Home Assistant is 2026.10.0, schemas use probatio
+
+Core 2026.10 types flow, service and websocket schemas as probatio, so the
+voluptuous schemas failed mypy (developer blog 2026-09-30, "Probatio is our
+validation engine"). The integration now imports `probatio` directly, as core
+does; runtime behavior is unchanged because core has validated with probatio
+since 2026.9. The suite runs on core 2026.10.0 and `hacs.json` follows the
+tested core. "Today" now comes from `dt_util.now()` (Home Assistant's
+configured time zone) instead of `date.today()`/`datetime.now()` (the host's,
+usually UTC in a container), and the test suite pins today to 2026-09-20 so the
+fixed fixture dates stay inside the horizon. Rejected: aliasing `probatio as
+vol`, which core's lint config bans.
+
+## 2026-11-23: cryptography range follows core 2026.10
+
+Core 2026.10 pins `cryptography==50.0.1` and `PyJWT==2.15.1`
+(`package_constraints.txt`). The optional-sources branch was written against
+core 2026.9 and declared `cryptography>=48.0.1,<49`, which cannot be installed
+next to core 2026.10, so the range in `manifest.json` and
+`requirements_test.txt` is now `>=48.0.1,<51`. `pyjwt>=2.13.0,<3` and
+`aioimaplib>=2.0.1,<3` already admit core's pins and are unchanged. These stay
+ranges, never exact pins (`docs/design-optional-sources.md`).
+
 ## Why the dead or paywalled sources are excluded
 
 Per `docs/research.md` section 1 and 2:
