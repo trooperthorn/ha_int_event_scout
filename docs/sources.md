@@ -83,3 +83,45 @@ organizer and follows `pagination.has_more_items` via `continuation`.
 
 No network access; used for city birthdays and known recurring festivals
 that have no feed at all.
+
+## `meetup`
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `name` | yes | Display name. |
+| `client_id` | yes | The Meetup OAuth client's ID (used as both the JWT `iss` and `kid`). Requires a Meetup Pro subscription to create; see the README. |
+| `member_id` | yes | Your Meetup member ID (the JWT `sub`). |
+| `private_key` | yes | The RSA private key (PEM) registered with the OAuth client. Multi-line; pasted directly, never a file path. |
+| `query` | no | Keyword filter passed to `eventSearch`. |
+| `category` | yes | Applied to every event from this source. |
+| `include_online` | no, default off | When off, events with `isOnline: true` are dropped. |
+| `topic_category_ids` | no | Meetup topic category IDs, if the live schema exposes that argument; leave empty when unknown. |
+
+Uses a JWT (server to server) OAuth client, the only unattended auth flow
+Meetup supports since going GraphQL-only in 2025 (`docs/decisions.md`). The
+exact `eventSearch` argument names are UNVERIFIED without a live Pro token
+(`docs/unverified.md`); validate runs an introspection query and stores the
+discovered argument names on the subentry, and fetch only ever uses those
+discovered names. Uses the hub's latitude, longitude, and radius. No vendor
+application data.
+
+## `vendor_email`
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `name` | yes | Display name. |
+| `server` | yes | IMAP server hostname. |
+| `port` | no, default `993` | IMAP over TLS only; there is no plaintext or STARTTLS option. |
+| `username`, `password` | yes | Mailbox credentials; an app password is strongly recommended (see the README for Gmail and Outlook). |
+| `folder` | no, default `INBOX` | |
+| `senders` | no, default `zapplication.org`, `festivalnet.com` | Matched as a domain suffix of the message's From address. |
+| `lookback_days` | no, default `14` | Only messages newer than this are read. |
+| `parsers` | no, default all three | `zapp`, `festivalnet`, `generic`. |
+| `mark_seen` | no, default off | The integration never deletes, moves, or copies mail; this is the only write it can ever make, and only when explicitly turned on. |
+
+Connects read-only (IMAP `EXAMINE`, never `SELECT`), searches by date,
+filters by sender, and runs each configured parser against the message
+text until one matches. Both the `zapp` and `festivalnet` parser fixtures
+are constructed from the vendors' own help-page descriptions of their
+digest layout, not real mail (`docs/unverified.md`); every parser tolerates
+a mismatched email by returning nothing rather than raising.

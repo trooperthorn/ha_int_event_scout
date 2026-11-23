@@ -29,6 +29,7 @@ CONF_DISTANCE_LIMIT: Final = "distance_limit"
 CONF_ROAD_FACTOR: Final = "road_factor"
 CONF_AVERAGE_SPEED_MPH: Final = "average_speed_mph"
 CONF_OSRM_URL: Final = "osrm_url"
+CONF_INCLUDE_UNLOCATED: Final = "include_unlocated"
 
 AREA_MODE_ANY: Final = "any"
 AREA_MODE_ALL: Final = "all"
@@ -59,6 +60,7 @@ DEFAULT_DISTANCE_LIMIT: Final = 50
 DEFAULT_ROAD_FACTOR: Final = 1.3
 DEFAULT_AVERAGE_SPEED_MPH: Final = 45
 DEFAULT_OSRM_URL: Final = ""
+DEFAULT_INCLUDE_UNLOCATED: Final = True
 
 CENSUS_GEOCODER_URL: Final = (
     "https://geocoding.geo.census.gov/geocoder/geographies/coordinates"
@@ -86,6 +88,8 @@ SOURCE_KIND_TICKETMASTER: Final = "ticketmaster"
 SOURCE_KIND_SOCRATA: Final = "socrata"
 SOURCE_KIND_MANUAL: Final = "manual"
 SOURCE_KIND_EVENTBRITE: Final = "eventbrite"
+SOURCE_KIND_MEETUP: Final = "meetup"
+SOURCE_KIND_VENDOR_EMAIL: Final = "vendor_email"
 
 SOURCE_KINDS: Final = [
     SOURCE_KIND_ICS,
@@ -94,7 +98,25 @@ SOURCE_KINDS: Final = [
     SOURCE_KIND_SOCRATA,
     SOURCE_KIND_MANUAL,
     SOURCE_KIND_EVENTBRITE,
+    SOURCE_KIND_MEETUP,
+    SOURCE_KIND_VENDOR_EMAIL,
 ]
+
+VENDOR_EMAIL_PARSER_ZAPP: Final = "zapp"
+VENDOR_EMAIL_PARSER_FESTIVALNET: Final = "festivalnet"
+VENDOR_EMAIL_PARSER_GENERIC: Final = "generic"
+VENDOR_EMAIL_PARSERS: Final = [
+    VENDOR_EMAIL_PARSER_ZAPP,
+    VENDOR_EMAIL_PARSER_FESTIVALNET,
+    VENDOR_EMAIL_PARSER_GENERIC,
+]
+DEFAULT_VENDOR_EMAIL_SENDERS: Final[list[str]] = ["zapplication.org", "festivalnet.com"]
+DEFAULT_VENDOR_EMAIL_PARSERS: Final[list[str]] = list(VENDOR_EMAIL_PARSERS)
+DEFAULT_VENDOR_EMAIL_PORT: Final = 993
+DEFAULT_VENDOR_EMAIL_FOLDER: Final = "INBOX"
+DEFAULT_VENDOR_EMAIL_LOOKBACK_DAYS: Final = 14
+DEFAULT_MARK_SEEN: Final = False
+DEFAULT_INCLUDE_ONLINE: Final = False
 
 CATEGORY_FESTIVAL: Final = "festival"
 CATEGORY_FAMILY: Final = "family"

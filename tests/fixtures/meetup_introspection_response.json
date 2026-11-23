@@ -1,0 +1,25 @@
+{
+  "data": {
+    "__schema": {
+      "queryType": {
+        "fields": [
+          {
+            "name": "eventSearch",
+            "args": [
+              {"name": "lat"},
+              {"name": "lon"},
+              {"name": "radius"},
+              {"name": "startDateRange"},
+              {"name": "query"},
+              {"name": "first"}
+            ]
+          },
+          {
+            "name": "self",
+            "args": []
+          }
+        ]
+      }
+    }
+  }
+}

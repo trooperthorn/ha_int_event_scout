@@ -21,10 +21,9 @@ Assistant instance and no real API credentials.
 
 ## Not built in this release (documented non-goals)
 
-- ZAPP and FestivalNet email (IMAP) ingestion.
-- A `meetup` source (blocked on a Meetup Pro subscription decision).
 - Any scraper against a paywalled vendor directory (ZAPP, FestivalNet,
-  Sunshine Artist member areas).
+  Sunshine Artist member areas). The `vendor_email` source reads the
+  member's own inbox instead, which is the terms-clean path.
 - A custom dashboard card.
 
 ## Not verified live in this build
@@ -72,3 +71,32 @@ Specifically not exercised against the real network:
 - The Census geocoder's actual rate limit; it publishes no numeric limit,
   so `county.py` serializes requests with a fixed 0.5 s spacing as a
   conservative default rather than a confirmed safe rate.
+
+## Optional sources (docs/design-optional-sources.md), added 2026-09-22
+
+- The Meetup GraphQL `eventSearch` field's exact argument names
+  (`sources/meetup.py`). No Meetup Pro subscription and token was available
+  at build time to run introspection against the live schema, so
+  `tests/fixtures/meetup_introspection_response.json` and
+  `meetup_eventsearch_response.json` are constructed from the 2025 GraphQL
+  migration guide and general GraphQL introspection shape, not recorded
+  from a real call. This is exactly why `validate()` runs its own
+  introspection query at setup time and stores the discovered names,
+  rather than the source ever hardcoding a guessed argument name: if the
+  live schema differs from the fixture, validate fails with a clear error
+  instead of fetch silently returning nothing or the wrong events.
+  `https://api.meetup.com/gql-ext` as the query endpoint and
+  `https://secure.meetup.com/oauth2/access` as the token endpoint are taken
+  from Meetup's published API documentation, also not exercised live.
+- Both `vendor_email` parser fixtures (`tests/fixtures/zapp_digest.txt`,
+  `zapp_digest.html`, `tests/fixtures/festivalnet_newsletter.txt`) are
+  constructed from ZAPP's and FestivalNet's own help-page descriptions of
+  their deadline digest and Calls for Artists email layout, not real mail,
+  because no ZAPP or FestivalNet membership was available at build time.
+  The parsers (`sources/vendor_email_parsers.py`) are written to tolerate a
+  mismatched or reformatted email by returning an empty list rather than
+  raising, specifically because the real layout is unverified.
+- Whether Gmail's and Outlook's current app-password setup flows match the
+  README's description; both are summarized from each provider's own
+  current help documentation, not re-verified against a live account
+  during this build.
